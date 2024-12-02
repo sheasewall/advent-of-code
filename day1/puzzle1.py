@@ -21,6 +21,8 @@ def parse_double_list_from_file(file_name):
 ## Puzzle 2
 
 def get_similarity_value(num, occurance_data):
+    # We should find 0 or 1 indices, so we
+    # can early exit if we find a single index
     indices = np.where(occurance_data[0] == num)[0]
     if not indices.size > 0:
         return 0
@@ -33,14 +35,24 @@ def get_total_similarity_score(list1, list2):
     occurance_data = np.unique_counts(list2)
 
     similarity_score = 0
+    similarity_table = {}
+    # For a given number, the similarity score 
+    # is constant for all occurance of that number
+    # so we can MEMOIZE.
     for i in range(len(list1)):
-        similarity_score += get_similarity_value(list1[i], occurance_data)
+        val = list1[i]
+        if similarity_table.get(val):
+            similarity_score += similarity_table[val]
+            break
+        similarity_score += get_similarity_value(val, occurance_data)
 
     return similarity_score
 
 def main(file_name):
     REPEAT_COUNT = 100
     TIME_ROUND = 10
+    P1_SOLUTION = 1882714
+    P2_SOLUTION = 19437052
     list1, list2 = parse_double_list_from_file(file_name)
     
     p1_time = min(timeit.repeat(lambda: get_distance(list1, list2), repeat=REPEAT_COUNT, number=1))
@@ -49,8 +61,8 @@ def main(file_name):
     p2_time = min(timeit.repeat(lambda: get_total_similarity_score(list1, list2), repeat=REPEAT_COUNT, number=1))
     p2_solution = get_total_similarity_score(list1, list2)
 
-    print("Puzzle 1:", p1_solution, "in", round(p1_time, TIME_ROUND))
-    print("Puzzle 2:", p2_solution, "in", round(p2_time, TIME_ROUND))
+    print("Puzzle 1:", p1_solution == P1_SOLUTION, "in", round(p1_time, TIME_ROUND))
+    print("Puzzle 2:", p2_solution == P2_SOLUTION, "in", round(p2_time, TIME_ROUND))
 
 if __name__ == '__main__':
     main(sys.argv[1])
