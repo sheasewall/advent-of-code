@@ -1,5 +1,6 @@
 import numpy as np
 
+import timeit
 import sys
 
 ## Puzzle 1
@@ -42,9 +43,18 @@ def get_total_similarity_score(list1, list2):
 
 
 def main(file_name):
+    REPEAT_COUNT = 100
+    TIME_ROUND = 10
     list1, list2 = parse_double_list_from_file(file_name)
-    print("Puzzle 1:", get_distance(list1, list2))
-    print("Puzzle 2:", get_total_similarity_score(list1, list2))
+    
+    p1_time = min(timeit.repeat(lambda: get_distance(list1, list2), repeat=REPEAT_COUNT, number=1))
+    p1_solution = get_distance(list1, list2)
+
+    p2_time = min(timeit.repeat(lambda: get_total_similarity_score(list1, list2), repeat=REPEAT_COUNT, number=1))
+    p2_solution = get_total_similarity_score(list1, list2)
+
+    print("Puzzle 1:", p1_solution, "in", round(p1_time, TIME_ROUND))
+    print("Puzzle 2:", p2_solution, "in", round(p2_time, TIME_ROUND))
 
 if __name__ == '__main__':
     main(sys.argv[1])
