@@ -4,9 +4,7 @@ import timeit
 import sys
 
 ## Puzzle 1
-# Assumes list1 and list2 have same length
-# Could we use setdiff or maybe setxor to 
-# shrink the values we have to compare?
+
 def get_distance(list1, list2):
     list1_sorted = np.sort(list1)
     list2_sorted = np.sort(list2)
@@ -35,12 +33,10 @@ def get_total_similarity_score(list1, list2):
     occurance_data = np.unique_counts(list2)
 
     similarity_score = 0
-    # MEMOIZE
     for i in range(len(list1)):
         similarity_score += get_similarity_value(list1[i], occurance_data)
 
     return similarity_score
-
 
 def main(file_name):
     REPEAT_COUNT = 100
