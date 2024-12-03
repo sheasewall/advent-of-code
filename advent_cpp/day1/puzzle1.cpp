@@ -5,6 +5,11 @@
 #include <algorithm>
 #include <chrono>
 
+// The push_heap operation is up to lg(list.size()). list.size() is at most n, the number of elements
+// to be read in total. Thus push_heap is at most lg(n). We do exactly one push for every element that 
+// is read, so the time complexity from heap pushes is at most nlg(n). vector pushes are generally
+// constant, and getline is generally linear on the number of characters read, so this function is
+// dominated by nlg(n) meaning it is O(nlg(n)).
 void readFileToHeaps(std::string file_name, std::vector<int> &left_list, std::vector<int> &right_list)
 {
     std::ifstream file(file_name);
@@ -22,6 +27,9 @@ void readFileToHeaps(std::string file_name, std::vector<int> &left_list, std::ve
     }
 }
 
+// pop_heap is up to 2lg(n) and happens exactly once for every element 
+// that was read in. front() and vector pop_back() are both constant.
+// The function is dominated by n * 2lg(n) and thus is O(nlg(n)).
 int getDistance(std::vector<int> left_heap, std::vector<int> right_heap)
 {
     int distance = 0;
@@ -36,6 +44,9 @@ int getDistance(std::vector<int> left_heap, std::vector<int> right_heap)
     return distance;
 }
 
+// Every element is pushed and eventually popped from a heap
+// so this algorithm is O(nlg(n)) or more specifically
+// up to 3nlg(n). 
 int puzzle1(std::string file_name) 
 {
     std::vector<int> left_heap;
@@ -44,6 +55,8 @@ int puzzle1(std::string file_name)
     return getDistance(left_heap, right_heap);
 }
 
+// This function recurses until every element has been popped 
+// from a heap. Thus it is up to 2nlg(n) or O(nlg(n)).
 int calculateSimilarityScore(std::vector<int> left_heap, std::vector<int> right_heap)
 {
     if (left_heap.size() == 0 || right_heap.size() == 0) 
@@ -70,6 +83,8 @@ int calculateSimilarityScore(std::vector<int> left_heap, std::vector<int> right_
     return left_head + calculateSimilarityScore(left_heap, right_heap);
 }
 
+// readFileToHeaps is up to nlg(n) and calculateSimilarityScore
+// is up to 2nlg(n), so this algorithm is 3nlg(n) or O(nlg(n)).
 int puzzle2(std::string file_name) 
 {
     std::vector<int> left_heap;
@@ -78,21 +93,72 @@ int puzzle2(std::string file_name)
     return calculateSimilarityScore(left_heap, right_heap);
 }
 
+int calculateSimilarityScoreSorted(std::vector<int> left_list, std::vector<int> right_list)
+{
+    if (left_list.size() == 0 || right_list.size() == 0) 
+    {
+        return 0;
+    }
+    int left_head = left_list.back();
+    int right_head = right_list.back();
+    if (left_head < right_head)
+    {
+        right_list.pop_back();
+        return calculateSimilarityScoreSorted(left_list, right_list); 
+    }
+    if (left_head > right_head) 
+    {
+        left_list.pop_back();
+        return calculateSimilarityScoreSorted(left_list, right_list);
+    }
+    // left_head == right_head
+    right_list.pop_back();
+    return left_head + calculateSimilarityScoreSorted(left_list, right_list);
+}
+
+int puzzle2sort(std::string file_name)
+{
+    std::vector<int> left;
+    std::vector<int> right;
+
+    std::ifstream file(file_name);
+    std::string str;
+    int parsed;
+    while (std::getline(file, str, ' '))
+    {
+        parsed = stoi(str);
+        left.push_back(parsed);
+        std::getline(file, str);
+        parsed = stoi(str);
+        right.push_back(parsed);
+    }
+
+    // each sort is nlg(n)
+    std::sort(left.begin(), left.end());
+    std::sort(right.begin(), right.end());
+
+    return calculateSimilarityScoreSorted(left, right);
+}
+
 int main(int argc, char *argv[])
 {
+    const int NUMBER_REPEATS = 5;
     const int NUMBER_TRIALS = 10000;
     const int P1_SOLUTION = 1882714;
     const int P2_SOLUTION = 19437052;
     const std::string file_name = argv[1];
 
     std::vector<long> p1_exec_times;
-    for (int i = 0; i < NUMBER_TRIALS; i++)
+    for (int i = 0; i < NUMBER_REPEATS; i++)
     {
         auto start = std::chrono::high_resolution_clock::now();
-        puzzle1(file_name);
+        for (int j = 0; j < NUMBER_TRIALS; j++) 
+        {
+            puzzle1(file_name);
+        }
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-        p1_exec_times.push_back(duration.count());
+        p1_exec_times.push_back(duration.count() / NUMBER_TRIALS);
     }
     if (puzzle1(file_name) == P1_SOLUTION)
     {
@@ -104,20 +170,46 @@ int main(int argc, char *argv[])
     }
 
     std::vector<long> p2_exec_times;
-    for (int i = 0; i < NUMBER_TRIALS; i++)
+    for (int i = 0; i < NUMBER_REPEATS; i++)
     {
         auto start = std::chrono::high_resolution_clock::now();
-        puzzle2(file_name);
+        for (int j = 0; j < NUMBER_TRIALS; j++) 
+        {
+            puzzle2(file_name);
+        }
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-        p2_exec_times.push_back(duration.count());
+        p2_exec_times.push_back(duration.count() / NUMBER_TRIALS);
     }
-    if (puzzle2(file_name) == P2_SOLUTION)
+    int p2_solution = puzzle2(file_name);
+    if (p2_solution == P2_SOLUTION)
     {
         std::cout << "Puzzle 2: " << *std::min_element(p2_exec_times.begin(), p2_exec_times.end()) << " microseconds" << std::endl;
     }
     else
     {
         std::cout << "Puzzle 2: incorrect" << std::endl;
+    }
+
+    std::vector<long> p2s_exec_times;
+    for (int i = 0; i < NUMBER_REPEATS; i++)
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        for (int j = 0; j < NUMBER_TRIALS; j++) 
+        {
+            puzzle2sort(file_name);
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        p2s_exec_times.push_back(duration.count() / NUMBER_TRIALS);
+    }
+    int p2s_solution = puzzle2sort(file_name);
+    if (p2s_solution == P2_SOLUTION)
+    {
+        std::cout << "P2sorted2: " << *std::min_element(p2s_exec_times.begin(), p2s_exec_times.end()) << " microseconds" << std::endl;
+    }
+    else
+    {
+        std::cout << "P2sorted: incorrect" << std::endl;
     }
 }
