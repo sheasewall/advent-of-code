@@ -93,6 +93,7 @@ int puzzle2(std::string file_name)
     return calculateSimilarityScore(left_heap, right_heap);
 }
 
+// Since we are only doing vector pops, this is O(n). 
 int calculateSimilarityScoreSorted(std::vector<int> left_list, std::vector<int> right_list)
 {
     if (left_list.size() == 0 || right_list.size() == 0) 
@@ -116,6 +117,8 @@ int calculateSimilarityScoreSorted(std::vector<int> left_list, std::vector<int> 
     return left_head + calculateSimilarityScoreSorted(left_list, right_list);
 }
 
+// this algorithm is dominated by the two nlg(n) sorts
+// so it is O(nlg(n)).
 int puzzle2sort(std::string file_name)
 {
     std::vector<int> left;
@@ -137,13 +140,14 @@ int puzzle2sort(std::string file_name)
     std::sort(left.begin(), left.end());
     std::sort(right.begin(), right.end());
 
+    // this should be O(n)
     return calculateSimilarityScoreSorted(left, right);
 }
 
 int main(int argc, char *argv[])
 {
     const int NUMBER_REPEATS = 5;
-    const int NUMBER_TRIALS = 10000;
+    const int NUMBER_TRIALS = 500;
     const int P1_SOLUTION = 1882714;
     const int P2_SOLUTION = 19437052;
     const std::string file_name = argv[1];
