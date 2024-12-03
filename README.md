@@ -1,5 +1,5 @@
 Stats:
 - Day 1:
-  - Unoptimized:
-    - `Puzzle 1: 0.000471167`
-    - `Puzzle 2: 0.000911416`
+  - `Puzzle 1: True in 0.0004864941`
+  - `Puzzle 2: True in 0.0009425262`
+  - `Puzzle 2: True in 0.0010172515 (memoized)`
