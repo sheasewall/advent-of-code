@@ -16,20 +16,14 @@ def get_report_safety(report):
     #decreasing
     if first_el > second_el:
         for i in range(len(report) - 1):
-            diff = report[i+1] - report[i]
-            if abs(diff) > 3:
-                return False
-            if np.sign(diff) != -1:
+            if report[i] <= report[i+1] or report[i] - 3 > report[i+1]:
                 return False
         return True
         
     #increasing
     if first_el < second_el:
         for i in range(len(report) - 1):
-            diff = report[i+1] - report[i]
-            if abs(diff) > 3:
-                return False
-            if np.sign(diff) != 1:
+            if report[i] >= report[i+1] or report[i] + 3 < report[i+1]:
                 return False
         return True
         
