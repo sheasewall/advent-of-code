@@ -8,3 +8,6 @@ Stats:
     - `Puzzle 1:  1100 microseconds`
     - `Puzzle 2: 17922 microseconds`
     - `P2sorted: 17182 microseconds`
+- Day 2:
+  - python
+    - `Puzzle 1: 2254 microseconds`
