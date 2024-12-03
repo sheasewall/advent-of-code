@@ -1,6 +1,6 @@
 import numpy as np
 
-from puzzle1 import parse_double_list_from_file
+from day1.puzzle1 import parse_double_list_from_file
 
 ## Puzzle 2
 # Since get_total_similarity_score is O(n^2),
