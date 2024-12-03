@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/sheasewall/Files/Code/Advent of Code/advent-of-code/advent_cpp/day1/puzzle1'
+relocations:     []
+...
