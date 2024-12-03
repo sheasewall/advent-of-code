@@ -22,16 +22,10 @@ def get_total_similarity_score(list1, list2):
 
     return similarity_score
 
-# Memoization only provides savings if there are many 
-# repeat elements, so this could be O(n^2) with all
-# unique elements.
 def puzzle2_memod_solver(file_name):
     list1, list2 = parse_double_list_from_file(file_name)
     return get_total_similarity_score_memoized(list1, list2)
 
-# unique_counts is O(nlg(n)), and get_similarity_value is O(n)
-# and it is called once for every unique element in list1,
-# so if there are no repeated elements then it is O(n^2).
 def get_total_similarity_score_memoized(list1, list2):
     occurance_data = np.unique_counts(list2)
 
@@ -48,7 +42,6 @@ def get_total_similarity_score_memoized(list1, list2):
 
     return similarity_score
 
-# O(n)
 def get_similarity_value(num, occurance_data):
     # We should find 0 or 1 indices, so we
     # can early exit if we find a single index

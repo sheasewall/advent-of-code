@@ -4,8 +4,6 @@
 
 #include "puzzle1.cpp"
 
-// This function recurses until every element has been popped 
-// from a heap. Thus it is up to 2nlg(n) or O(nlg(n)).
 int calculateSimilarityScore(std::vector<int> left_heap, std::vector<int> right_heap)
 {
     if (left_heap.size() == 0 || right_heap.size() == 0) 
@@ -32,8 +30,6 @@ int calculateSimilarityScore(std::vector<int> left_heap, std::vector<int> right_
     return left_head + calculateSimilarityScore(left_heap, right_heap);
 }
 
-// readFileToHeaps is up to nlg(n) and calculateSimilarityScore
-// is up to 2nlg(n), so this algorithm is 3nlg(n) or O(nlg(n)).
 int puzzle2Solver(std::string file_name) 
 {
     std::vector<int> left_heap;
@@ -42,7 +38,6 @@ int puzzle2Solver(std::string file_name)
     return calculateSimilarityScore(left_heap, right_heap);
 }
 
-// Since we are only doing vector pops, this is O(n). 
 int calculateSimilarityScoreSorted(std::vector<int> left_list, std::vector<int> right_list)
 {
     if (left_list.size() == 0 || right_list.size() == 0) 
@@ -66,8 +61,6 @@ int calculateSimilarityScoreSorted(std::vector<int> left_list, std::vector<int> 
     return left_head + calculateSimilarityScoreSorted(left_list, right_list);
 }
 
-// this algorithm is dominated by the two nlg(n) sorts
-// so it is O(nlg(n)).
 int puzzle2SortedSolver(std::string file_name)
 {
     std::vector<int> left;
@@ -85,10 +78,8 @@ int puzzle2SortedSolver(std::string file_name)
         right.push_back(parsed);
     }
 
-    // each sort is nlg(n)
     std::sort(left.begin(), left.end());
     std::sort(right.begin(), right.end());
 
-    // this should be O(n)
     return calculateSimilarityScoreSorted(left, right);
 }
