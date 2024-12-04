@@ -21,6 +21,7 @@ public:
     long timeSolver(int num_reps, int num_batches);
     long timeSolver(int num_reps, int num_batches, T input_data);
     bool verifySolver();
+    void reportCalculation();
     void reportTrial(int num_batches, int num_reps);
     void reportTrial(int num_batches, int num_reps, T input_data);
 
@@ -99,9 +100,18 @@ long Solver<T, S>::timeSolver(int num_batches, int num_reps, T input_data)
 template <typename T, typename S>
 bool Solver<T, S>::verifySolver()
 {
-    int computed_solution = computeSolution();
-    int solution = getCorrectSolution();
+    S computed_solution = computeSolution();
+    S solution = getCorrectSolution();
     return computed_solution == solution;
+}
+
+template <typename T, typename S>
+void Solver<T, S>::reportCalculation() 
+{
+    S computed_solution = computeSolution();
+    S solution = getCorrectSolution();
+    std::cout << "Solver got answer: " << computed_solution 
+        << " and the correct answer is " << solution << std::endl;
 }
 
 template <typename T, typename S>
