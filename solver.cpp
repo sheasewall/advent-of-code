@@ -5,33 +5,39 @@
 #include <fstream>
 #include <iostream>
 
+template <typename T, typename S>
 class Solver
 {
 public:
-    int (*pSolver)(std::string file_name);
     int day_index;
     int puzzle_index;
 
-    Solver(int day_index, int puzzle_index, int (*pSolver)(std::string file_name));
+    Solver(int day_index, int puzzle_index);
 
+    virtual T parseFile() = 0;
+    S computeSolution();
+    virtual S computeSolution(T input_data) = 0;
+    virtual S getCorrectSolution() = 0;
+    long timeSolver(int num_reps, int num_batches);
+    long timeSolver(int num_reps, int num_batches, T input_data);
+    bool verifySolver();
+    void reportTrial(int num_batches, int num_reps);
+    void reportTrial(int num_batches, int num_reps, T input_data);
+
+protected:
     std::string getInputFileName();
     std::string getSolutionFileName();
-
-    int computeSolution();
-    int getCorrectSolution();
-    long timeSolver(int num_reps, int num_batches);
-    bool verifySolver();
-
-    static void timeDay(int day_index, std::vector<int> puzzle_indices, std::vector<int (*)(std::string file_name)> pSolvers, std::vector<std::array<int, 2>> timing_info);
 };
 
-Solver::Solver(int day_index, int puzzle_index, int (*pSolver)(std::string file_name)) {
+template <typename T, typename S>
+Solver<T, S>::Solver(int day_index, int puzzle_index)
+{
     this->day_index = day_index;
     this->puzzle_index = puzzle_index;
-    this->pSolver = pSolver;
 }
 
-std::string Solver::getInputFileName() 
+template <typename T, typename S>
+std::string Solver<T, S>::getInputFileName()
 {
     std::string input_file_name = "day";
     input_file_name += std::to_string(day_index);
@@ -39,7 +45,8 @@ std::string Solver::getInputFileName()
     return input_file_name;
 }
 
-std::string Solver::getSolutionFileName() 
+template <typename T, typename S>
+std::string Solver<T, S>::getSolutionFileName()
 {
     std::string solution_file_name = "day";
     solution_file_name += std::to_string(day_index);
@@ -47,33 +54,22 @@ std::string Solver::getSolutionFileName()
     return solution_file_name;
 }
 
-int Solver::computeSolution() 
+template <typename T, typename S>
+S Solver<T, S>::computeSolution()
 {
-    return pSolver(getInputFileName());
+    return computeSolution(parseFile());
 }
 
-int Solver::getCorrectSolution() 
-{
-    std::ifstream file(getSolutionFileName());
-    std::string str;
-    int solutions[2];
-    std::getline(file, str);
-    solutions[0] = stoi(str);
-    std::getline(file, str);
-    solutions[1] = stoi(str);
-
-    return solutions[puzzle_index - 1];
-}
-
-long Solver::timeSolver(int num_batches, int num_reps)
+template <typename T, typename S>
+long Solver<T, S>::timeSolver(int num_batches, int num_reps)
 {
     std::vector<long> exec_times;
     for (int i = 0; i < num_batches; i++)
     {
         auto start = std::chrono::high_resolution_clock::now();
-        for (int j = 0; j < num_reps; j++) 
+        for (int j = 0; j < num_reps; j++)
         {
-            pSolver(getInputFileName());
+            computeSolution();
         }
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
@@ -82,19 +78,48 @@ long Solver::timeSolver(int num_batches, int num_reps)
     return *std::min_element(exec_times.begin(), exec_times.end()) / num_reps;
 }
 
-bool Solver::verifySolver() {
+template <typename T, typename S>
+long Solver<T, S>::timeSolver(int num_batches, int num_reps, T input_data)
+{
+    std::vector<long> exec_times;
+    for (int i = 0; i < num_batches; i++)
+    {
+        auto start = std::chrono::high_resolution_clock::now();
+        for (int j = 0; j < num_reps; j++)
+        {
+            computeSolution(input_data);
+        }
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        exec_times.push_back(duration.count());
+    }
+    return *std::min_element(exec_times.begin(), exec_times.end()) / num_reps;
+}
+
+template <typename T, typename S>
+bool Solver<T, S>::verifySolver()
+{
     int computed_solution = computeSolution();
     int solution = getCorrectSolution();
     return computed_solution == solution;
 }
 
-void Solver::timeDay(int day_index, std::vector<int> puzzle_indices, std::vector<int (*)(std::string file_name)> pSolvers, std::vector<std::array<int, 2>> timing_info) {
-    for (int i = 0; i < pSolvers.size(); i++) {
-        Solver solver = Solver(day_index, puzzle_indices[i], pSolvers[i]);
-        long best_avg = solver.timeSolver(timing_info[i][0], timing_info[i][1]);
-        bool is_correct = solver.verifySolver();
-        std::cout << "Solver " << std::to_string(i) << " computed a " 
-            << (is_correct ? "True" : "False") << " answer in " << std::to_string(best_avg) 
-            << " microseconds" << std::endl;
-    }    
+template <typename T, typename S>
+void Solver<T, S>::reportTrial(int num_batches, int num_reps)
+{
+    bool is_correct = verifySolver();
+    long best_avg = timeSolver(num_batches, num_reps);
+    std::cout << "Solver parsed file and computed a "
+              << (is_correct ? "True" : "False") << " answer in "
+              << std::to_string(best_avg) << " microseconds" << std::endl;
+}
+
+template <typename T, typename S>
+void Solver<T, S>::reportTrial(int num_batches, int num_reps, T input_data)
+{
+    bool is_correct = verifySolver();
+    long best_avg = timeSolver(num_batches, num_reps, input_data);
+    std::cout << "Solver computed a "
+              << (is_correct ? "True" : "False") << " answer in "
+              << std::to_string(best_avg) << " microseconds" << std::endl;
 }
