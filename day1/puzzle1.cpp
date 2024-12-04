@@ -36,10 +36,13 @@ int getDistance(std::vector<int> left_heap, std::vector<int> right_heap)
     return distance;
 }
 
-int puzzle1Solver(std::string file_name) 
+namespace day1
 {
-    std::vector<int> left_heap;
-    std::vector<int> right_heap;
-    readFileToHeaps(file_name, left_heap, right_heap);
-    return getDistance(left_heap, right_heap);
+    int puzzle1Solver(std::string file_name)
+    {
+        std::vector<int> left_heap;
+        std::vector<int> right_heap;
+        readFileToHeaps(file_name, left_heap, right_heap);
+        return getDistance(left_heap, right_heap);
+    }
 }

@@ -10,4 +10,8 @@ Stats:
     - `P2sorted: 17182 microseconds`
 - Day 2:
   - python
-    - `Puzzle 1: 1210 microseconds`
+    - `Puzzle 1: 1237 microseconds`
+    - `P1simple: 1339 microseconds`
+    - `Puzzle 2: 2206 microseconds`
+  - C++
+    - `Puzzle 1: 3153 microseconds`

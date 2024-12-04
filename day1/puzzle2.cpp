@@ -6,7 +6,7 @@
 
 int calculateSimilarityScore(std::vector<int> left_heap, std::vector<int> right_heap)
 {
-    if (left_heap.size() == 0 || right_heap.size() == 0) 
+    if (left_heap.size() == 0 || right_heap.size() == 0)
     {
         return 0;
     }
@@ -16,9 +16,9 @@ int calculateSimilarityScore(std::vector<int> left_heap, std::vector<int> right_
     {
         std::pop_heap(right_heap.begin(), right_heap.end());
         right_heap.pop_back();
-        return calculateSimilarityScore(left_heap, right_heap); 
+        return calculateSimilarityScore(left_heap, right_heap);
     }
-    if (left_head > right_head) 
+    if (left_head > right_head)
     {
         std::pop_heap(left_heap.begin(), left_heap.end());
         left_heap.pop_back();
@@ -30,17 +30,20 @@ int calculateSimilarityScore(std::vector<int> left_heap, std::vector<int> right_
     return left_head + calculateSimilarityScore(left_heap, right_heap);
 }
 
-int puzzle2Solver(std::string file_name) 
+namespace day1
 {
-    std::vector<int> left_heap;
-    std::vector<int> right_heap;
-    readFileToHeaps(file_name, left_heap, right_heap);
-    return calculateSimilarityScore(left_heap, right_heap);
+    int puzzle2Solver(std::string file_name)
+    {
+        std::vector<int> left_heap;
+        std::vector<int> right_heap;
+        readFileToHeaps(file_name, left_heap, right_heap);
+        return calculateSimilarityScore(left_heap, right_heap);
+    }
 }
 
 int calculateSimilarityScoreSorted(std::vector<int> left_list, std::vector<int> right_list)
 {
-    if (left_list.size() == 0 || right_list.size() == 0) 
+    if (left_list.size() == 0 || right_list.size() == 0)
     {
         return 0;
     }
@@ -49,9 +52,9 @@ int calculateSimilarityScoreSorted(std::vector<int> left_list, std::vector<int> 
     if (left_head < right_head)
     {
         right_list.pop_back();
-        return calculateSimilarityScoreSorted(left_list, right_list); 
+        return calculateSimilarityScoreSorted(left_list, right_list);
     }
-    if (left_head > right_head) 
+    if (left_head > right_head)
     {
         left_list.pop_back();
         return calculateSimilarityScoreSorted(left_list, right_list);
