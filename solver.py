@@ -27,15 +27,13 @@ class Solver:
         self.parser = parser
         self.solver = solver
         
-        if solution_parser is None:
-            solution_parser = default_int_parser
-        self.solution_parser = solution_parser
+        self.solution_parser = solution_parser or default_int_parser
+        
         self.input_name = f"day{day}/input.txt"
         self.solution_name = f"day{day}/solutions.txt"
         
     def parse_file(self, input_file_name=None):
-        if input_file_name is None:
-            input_file_name = self.input_name
+        input_file_name = input_file_name or self.input_name
             
         return self.parser(input_file_name)
     
@@ -48,8 +46,7 @@ class Solver:
         return self.solver(data)
     
     def get_correct_solution(self, solution_file_name=None):
-        if solution_file_name is None:
-            solution_file_name = self.solution_name
+        solution_file_name = solution_file_name or self.solution_name
             
         return self.solution_parser(solution_file_name)[self.puzzle - 1]
     
