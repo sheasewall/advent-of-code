@@ -1,4 +1,4 @@
-import numpy as np
+import solver
 
 def read_reports(file_name):
     reports = []
@@ -40,9 +40,7 @@ def is_safe(report):
     
     return False
 
-def get_safe_count(file_name, is_safe_algorithm):
-    reports = read_reports(file_name)
-    
+def get_safe_count(reports, is_safe_algorithm):    
     safety = 0
     for report in reports:
         if is_safe_algorithm(report):
@@ -50,8 +48,11 @@ def get_safe_count(file_name, is_safe_algorithm):
             
     return safety
 
-def puzzle1_solver(file_name):
-    return get_safe_count(file_name, is_safe)
+def solve_puzzle1(reports):
+    return get_safe_count(reports, is_safe)
 
-def puzzle1_solver_simpler(file_name):
-    return get_safe_count(file_name, is_safe_simpler)
+def solve_puzzle1_simpler(reports):
+    return get_safe_count(reports, is_safe_simpler)
+
+puzzle1_solver = solver.Solver("find direction first", 2, 1, read_reports, solve_puzzle1)
+puzzle1_solver_simpler = solver.Solver("check both directions", 2, 1, read_reports, solve_puzzle1_simpler)

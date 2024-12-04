@@ -227,35 +227,6 @@ int countSafety(std::vector<std::vector<unsigned int>> reports, bool (*pSafetyDe
     return safety_score;
 }
 
-void compareSafetyFunctions()
-{
-    std::vector<std::vector<unsigned int>> reports;
-    std::ifstream file("day2/input.txt");
-    std::string buf;
-    while (getline(file, buf, '\n'))
-    {
-        reports.push_back(parseReport(buf));
-    }
-            
-    for (size_t i = 0; i < reports.size(); ++i)
-    {
-        bool resultDampened = isSafeDampenedRecursive(reports[i]);
-        bool resultDampenedK = isSafeDampenedRecursiveK(reports[i]);
-
-        if (resultDampened != resultDampenedK)
-        {
-            std::cout << "Disagreement on test case " << i << ":\n";
-            std::cout << "Report: ";
-            for (unsigned int value : reports[i])
-            {
-                std::cout << value << " ";
-            }
-            std::cout << "\nisSafeDampened: " << resultDampened << "\n";
-            std::cout << "isSafeDampenedK: " << resultDampenedK << "\n\n";
-        }
-    }
-}
-
 namespace day2
 {
     class Day2Solver : public Solver<std::vector<std::vector<unsigned int>>, int>

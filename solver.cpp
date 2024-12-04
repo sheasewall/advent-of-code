@@ -15,11 +15,11 @@ public:
     Solver(int day_index, int puzzle_index);
 
     virtual T parseFile() = 0;
-    S computeSolution();
     virtual S computeSolution(T input_data) = 0;
     virtual S getCorrectSolution() = 0;
-    long timeSolver(int num_reps, int num_batches);
-    long timeSolver(int num_reps, int num_batches, T input_data);
+    S computeSolution() { return computeSolution(parseFile()); };
+    long timeSolver(int num_batches, int num_reps);
+    long timeSolver(int num_batches, int num_reps, T input_data);
     bool verifySolver();
     void reportCalculation();
     void reportTrial(int num_batches, int num_reps);
@@ -53,12 +53,6 @@ std::string Solver<T, S>::getSolutionFileName()
     solution_file_name += std::to_string(day_index);
     solution_file_name += "/solutions.txt";
     return solution_file_name;
-}
-
-template <typename T, typename S>
-S Solver<T, S>::computeSolution()
-{
-    return computeSolution(parseFile());
 }
 
 template <typename T, typename S>
