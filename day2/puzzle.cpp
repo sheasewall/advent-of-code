@@ -246,18 +246,6 @@ namespace day2
             }
             return reports;
         }
-
-        std::vector<int> parseSolutionFile(std::string file_name) override
-        {
-            std::ifstream file(file_name);
-            std::string str;
-            std::vector<int> solutions;
-            std::getline(file, str);
-            solutions.push_back(std::stoi(str));
-            std::getline(file, str);
-            solutions.push_back(std::stoi(str));
-            return solutions;
-        }
     };
 
     class Puzzle1Solver : public Day2Solver

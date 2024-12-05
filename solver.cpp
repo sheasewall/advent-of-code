@@ -34,6 +34,19 @@ struct TrialResults
     VerificationResults<K> verification;
 };
 
+// Specialization for int type
+template<typename S>
+std::vector<int> defaultParseSolutionFile(std::string file_name) {
+    std::ifstream file(file_name);
+    std::string str;
+    std::vector<int> solutions;
+    std::getline(file, str);
+    solutions.push_back(std::stoi(str));
+    std::getline(file, str);
+    solutions.push_back(std::stoi(str));
+    return solutions;
+}
+
 template <typename T, typename S>
 class Solver
 {
@@ -47,7 +60,7 @@ public:
 
     virtual T parseInputFile(std::string file_name) = 0;
     virtual S computeSolution(T input_data) = 0;
-    virtual std::vector<S> parseSolutionFile(std::string file_name) = 0;
+    virtual std::vector<S> parseSolutionFile(std::string file_name) { return defaultParseSolutionFile<S>(file_name); }
 
     S getCorrectSolution(std::string file_name) { return parseSolutionFile(file_name)[puzzle_index - 1]; }
     VerificationResults<S> verify(std::string input_file_name, std::string solution_file_name);
