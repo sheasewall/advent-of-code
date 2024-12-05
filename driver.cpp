@@ -7,25 +7,30 @@
 
 void timeDay2()
 {
+    TrialParameters parsing = {true, 5, 100};
+    TrialParameters non_parsing = {false, 10, 50};
+    std::array<TrialParameters, 2> params = {parsing, non_parsing};
+
     day2::Puzzle1Solver d2p1 = day2::Puzzle1Solver();
-    d2p1.reportTrial(5, 100);
-    d2p1.reportTrial(5, 100, d2p1.parseFile());
+    d2p1.reportDefaultTrials(params);
 
     day2::Puzzle1SolverSimple d2p1Simple = day2::Puzzle1SolverSimple();
-    d2p1Simple.reportTrial(5, 100);
-    d2p1Simple.reportTrial(5, 100, d2p1Simple.parseFile());
+    d2p1Simple.reportDefaultTrials(params);
 
     day2::Puzzle1SolverRecursive d2p1Recursive = day2::Puzzle1SolverRecursive();
-    d2p1Recursive.reportTrial(5, 100);
-    d2p1Recursive.reportTrial(5, 100, d2p1Recursive.parseFile());
+    d2p1Recursive.reportDefaultTrials(params);
 
     day2::Puzzle2SolverRecursive d2p2Recursive = day2::Puzzle2SolverRecursive();
-    d2p2Recursive.reportTrial(5, 100);
-    d2p2Recursive.reportTrial(5, 100, d2p2Recursive.parseFile());
+    d2p2Recursive.reportDefaultTrials(params);
+
+    day2::Puzzle2SolverRecursiveK d2p2RecursiveK = day2::Puzzle2SolverRecursiveK();
+    d2p2RecursiveK.reportDefaultTrials(params);
+
+    // d2p1.computeSolution(); doesn't work, but d2p1.day2::Day2Solver::computeSolution(); does
 }
 
 int main(int argc, char *argv[])
 {
-
+    timeDay2();
     return 0;
 }

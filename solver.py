@@ -11,13 +11,13 @@ def default_int_parser(solution_file_name):
     
     return solutions
 
-def test_solvers(solvers, testing_metadatas=None):
+def test_solvers(solvers, testing_metadatas=None, input_file_name=None, solution_file_name=None):
     for idx, solver in enumerate(solvers):
         if testing_metadatas:
-            solver.report_trial_with_and_without_parsing(testing_metadatas[idx])
+            solver.report_trials(testing_metadatas[idx], input_file_name, solution_file_name)
             continue
         
-        solver.report_trial_with_and_without_parsing()
+        solver.report_trials(input_file_name=input_file_name, solution_file_name=solution_file_name)
 
 class Solver:
     def __init__(self, name, day, puzzle, parser, solver, solution_parser=None):
@@ -77,11 +77,11 @@ class Solver:
         best_avg = self.time_solver(num_batches, num_reps, data, input_file_name)
         return (is_correct, best_avg)
     
-    def report_trial_with_and_without_parsing(self, timing_metadata={"parsing":(10, 100), "no_parsing":(5, 1000)},
+    def report_trials(self, timing_metadata={"parsing":(10, 100), "no_parsing":(5, 1000)},
                                               input_file_name=None, solution_file_name=None):
         is_correct_parsing, best_avg_parsing = self.trial(timing_metadata["parsing"][0], timing_metadata["parsing"][1], None, input_file_name, solution_file_name)
         data = self.parse_file(input_file_name)
-        is_correct_no_parsing, best_avg_no_parsing = self.trial(timing_metadata["no_parsing"][0], timing_metadata["no_parsing"][1], data, input_file_name, solution_file_name)
+        is_correct_no_parsing, best_avg_no_parsing = self.trial(timing_metadata["no_parsing"][0], timing_metadata["no_parsing"][1], data, solution_file_name=solution_file_name)
         
         if is_correct_parsing and is_correct_no_parsing:
             print(f"✓✓✓ {self.name} got correct solution in {best_avg_no_parsing}μs ({best_avg_parsing}μs w/ parsing)")

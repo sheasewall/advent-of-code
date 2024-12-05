@@ -5,34 +5,67 @@
 #include <fstream>
 #include <iostream>
 
-template <typename T, typename S>
-class Solver
+template <typename K>
+struct VerificationResults
 {
-public:
-    int day_index;
-    int puzzle_index;
+    bool is_correct;
+    K computed_solution;
+    K correct_solution;
 
-    Solver(int day_index, int puzzle_index);
+    VerificationResults(K computed_solution, K correct_solution)
+    {
+        this->is_correct = (computed_solution == correct_solution);
+        this->computed_solution = computed_solution;
+        this->correct_solution = correct_solution;
+    }
+};
 
-    virtual T parseFile() = 0;
-    virtual S computeSolution(T input_data) = 0;
-    virtual S getCorrectSolution() = 0;
-    S computeSolution() { return computeSolution(parseFile()); };
-    long timeSolver(int num_batches, int num_reps);
-    long timeSolver(int num_batches, int num_reps, T input_data);
-    bool verifySolver();
-    void reportCalculation();
-    void reportTrial(int num_batches, int num_reps);
-    void reportTrial(int num_batches, int num_reps, T input_data);
+struct TrialParameters
+{
+    bool must_parse;
+    int num_batches;
+    int num_reps;
+};
 
-protected:
-    std::string getInputFileName();
-    std::string getSolutionFileName();
+template <typename K>
+struct TrialResults
+{
+    long best_avg;
+    VerificationResults<K> verification;
 };
 
 template <typename T, typename S>
-Solver<T, S>::Solver(int day_index, int puzzle_index)
+class Solver
 {
+private:
+    std::string name;
+    int day_index;
+    int puzzle_index;
+
+public:
+    Solver(std::string name, int day_index, int puzzle_index);
+
+    virtual T parseInputFile(std::string file_name) = 0;
+    virtual S computeSolution(T input_data) = 0;
+    virtual std::vector<S> parseSolutionFile(std::string file_name) = 0;
+
+    S getCorrectSolution(std::string file_name) { return parseSolutionFile(file_name)[puzzle_index - 1]; }
+    VerificationResults<S> verify(std::string input_file_name, std::string solution_file_name);
+    TrialResults<S> trial(std::string input_file_name, std::string solution_file_name, TrialParameters params);
+
+    void reportVerification(std::string input_file_name, std::string solution_file_name);
+    void reportTrial(std::string input_file_name, std::string solution_file_name, TrialParameters params);
+    void reportDefaultTrials(std::array<TrialParameters,2> params);
+
+    std::string getInputFileName();
+    std::string getSolutionFileName();
+    std::string getName();
+};
+
+template <typename T, typename S>
+Solver<T, S>::Solver(std::string name, int day_index, int puzzle_index)
+{
+    this->name = name;
     this->day_index = day_index;
     this->puzzle_index = puzzle_index;
 }
@@ -56,74 +89,90 @@ std::string Solver<T, S>::getSolutionFileName()
 }
 
 template <typename T, typename S>
-long Solver<T, S>::timeSolver(int num_batches, int num_reps)
+std::string Solver<T, S>::getName()
 {
+    std::string shorthand_name = "D";
+    shorthand_name += std::to_string(day_index);
+    shorthand_name += "P";
+    shorthand_name += std::to_string(puzzle_index);
+    shorthand_name += " \"";
+    shorthand_name += name;
+    shorthand_name += "\"";
+    return shorthand_name;
+}
+
+template <typename T, typename S>
+VerificationResults<S> Solver<T, S>::verify(std::string input_file_name, std::string solution_file_name)
+{
+    T data = parseInputFile(input_file_name);
+    S computed_solution = computeSolution(data);
+    S correct_solution = getCorrectSolution(solution_file_name);
+
+    return VerificationResults<S>(computed_solution, correct_solution);
+}
+
+template <typename T, typename S>
+TrialResults<S> Solver<T, S>::trial(std::string input_file_name, std::string solution_file_name, TrialParameters params)
+{
+    T data = parseInputFile(input_file_name);
     std::vector<long> exec_times;
-    for (int i = 0; i < num_batches; i++)
+    for (int i = 0; i < params.num_batches; i++)
     {
-        auto start = std::chrono::high_resolution_clock::now();
-        for (int j = 0; j < num_reps; j++)
+        std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+        for (int j = 0; j < params.num_reps; j++)
         {
-            computeSolution();
+            if (params.must_parse)
+            {
+                computeSolution(parseInputFile(input_file_name));
+            }
+            else
+            {
+                computeSolution(data);
+            }
         }
-        auto end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+        std::chrono::microseconds duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
         exec_times.push_back(duration.count());
     }
-    return *std::min_element(exec_times.begin(), exec_times.end()) / num_reps;
+    long best_avg = *std::min_element(exec_times.begin(), exec_times.end()) / params.num_reps;
+    VerificationResults<S> verification = verify(input_file_name, solution_file_name);
+    return {best_avg, verification};
 }
 
 template <typename T, typename S>
-long Solver<T, S>::timeSolver(int num_batches, int num_reps, T input_data)
+void Solver<T, S>::reportVerification(std::string input_file_name, std::string solution_file_name)
 {
-    std::vector<long> exec_times;
-    for (int i = 0; i < num_batches; i++)
+    VerificationResults<S> results = verify(input_file_name, solution_file_name);
+    if (results.is_correct)
     {
-        auto start = std::chrono::high_resolution_clock::now();
-        for (int j = 0; j < num_reps; j++)
-        {
-            computeSolution(input_data);
-        }
-        auto end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-        exec_times.push_back(duration.count());
+        std::cout << "✓✓✓ " << getName() << " got correct solution: "
+                  << results.computed_solution << std::endl;
+        return;
     }
-    return *std::min_element(exec_times.begin(), exec_times.end()) / num_reps;
+
+    std::cout << "xxx " << getName() << " got incorrect solution: "
+              << results.computed_solution << ". Correct solution is: "
+              << results.correct_solution << std::endl;
 }
 
 template <typename T, typename S>
-bool Solver<T, S>::verifySolver()
+void Solver<T, S>::reportTrial(std::string input_file_name, std::string solution_file_name, TrialParameters params)
 {
-    S computed_solution = computeSolution();
-    S solution = getCorrectSolution();
-    return computed_solution == solution;
+    TrialResults<S> results = trial(input_file_name, solution_file_name, params);
+    bool is_correct = results.verification.is_correct;
+    std::cout << (is_correct ? "✓✓✓ " : "xxx ")
+              << getName() << " got " << (is_correct ? "correct" : "incorrect")
+              << " solution in " << results.best_avg << " μs "
+              << (params.must_parse ? "with" : "without") << " parsing" << std::endl;
 }
 
 template <typename T, typename S>
-void Solver<T, S>::reportCalculation() 
+void Solver<T, S>::reportDefaultTrials(std::array<TrialParameters,2> params) 
 {
-    S computed_solution = computeSolution();
-    S solution = getCorrectSolution();
-    std::cout << "Solver got answer: " << computed_solution 
-        << " and the correct answer is " << solution << std::endl;
-}
-
-template <typename T, typename S>
-void Solver<T, S>::reportTrial(int num_batches, int num_reps)
-{
-    bool is_correct = verifySolver();
-    long best_avg = timeSolver(num_batches, num_reps);
-    std::cout << "Solver parsed file and computed a "
-              << (is_correct ? "True" : "False") << " answer in "
-              << std::to_string(best_avg) << " microseconds" << std::endl;
-}
-
-template <typename T, typename S>
-void Solver<T, S>::reportTrial(int num_batches, int num_reps, T input_data)
-{
-    bool is_correct = verifySolver();
-    long best_avg = timeSolver(num_batches, num_reps, input_data);
-    std::cout << "Solver computed a "
-              << (is_correct ? "True" : "False") << " answer in "
-              << std::to_string(best_avg) << " microseconds" << std::endl;
+    if (params[0].must_parse == params[1].must_parse)
+    {
+        throw std::invalid_argument("There should be one parsing params and one non-parsing params.");
+    }
+    reportTrial(getInputFileName(), getSolutionFileName(), params[0]);
+    reportTrial(getInputFileName(), getSolutionFileName(), params[1]);
 }

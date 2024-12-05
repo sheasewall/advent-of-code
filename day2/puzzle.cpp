@@ -232,12 +232,12 @@ namespace day2
     class Day2Solver : public Solver<std::vector<std::vector<unsigned int>>, int>
     {
     public:
-        Day2Solver(int puzzle_index) : Solver(2, puzzle_index) {}
+        Day2Solver(std::string name, int puzzle_index) : Solver(name, 2, puzzle_index) {}
 
-        std::vector<std::vector<unsigned int>> parseFile() override
+        std::vector<std::vector<unsigned int>> parseInputFile(std::string file_name) override
         {
             std::vector<std::vector<unsigned int>> reports;
-            std::ifstream file(getInputFileName());
+            std::ifstream file(file_name);
             std::string buf;
             while (getline(file, buf, '\n'))
             {
@@ -246,23 +246,23 @@ namespace day2
             return reports;
         }
 
-        int getCorrectSolution() override
+        std::vector<int> parseSolutionFile(std::string file_name) override
         {
-            std::ifstream file(getSolutionFileName());
+            std::ifstream file(file_name);
             std::string str;
-            int solutions[2];
+            std::vector<int> solutions;
             std::getline(file, str);
-            solutions[0] = std::stoi(str);
+            solutions.push_back(std::stoi(str));
             std::getline(file, str);
-            solutions[1] = std::stoi(str);
-            return solutions[puzzle_index - 1];
+            solutions.push_back(std::stoi(str));
+            return solutions;
         }
     };
 
     class Puzzle1Solver : public Day2Solver
     {
     public:
-        Puzzle1Solver() : Day2Solver(1) {}
+        Puzzle1Solver() : Day2Solver("checks for direction first", 1) {}
 
         int computeSolution(std::vector<std::vector<unsigned int>> reports) override
         {
@@ -273,7 +273,7 @@ namespace day2
     class Puzzle1SolverRecursive : public Day2Solver
     {
     public:
-        Puzzle1SolverRecursive() : Day2Solver(1) {}
+        Puzzle1SolverRecursive() : Day2Solver("recursive", 1) {}
 
         int computeSolution(std::vector<std::vector<unsigned int>> reports) override
         {
@@ -284,7 +284,7 @@ namespace day2
     class Puzzle1SolverSimple : public Day2Solver
     {
     public:
-        Puzzle1SolverSimple() : Day2Solver(1) {}
+        Puzzle1SolverSimple() : Day2Solver("nonrecursive, doesn't check for direction", 1) {}
 
         int computeSolution(std::vector<std::vector<unsigned int>> reports) override
         {
@@ -295,7 +295,7 @@ namespace day2
     class Puzzle2SolverRecursive : public Day2Solver
     {
     public:
-        Puzzle2SolverRecursive() : Day2Solver(2) {}
+        Puzzle2SolverRecursive() : Day2Solver("recursive", 2) {}
 
         int computeSolution(std::vector<std::vector<unsigned int>> reports) override
         {
@@ -306,7 +306,7 @@ namespace day2
     class Puzzle2SolverRecursiveK : public Day2Solver
     {
     public:
-        Puzzle2SolverRecursiveK() : Day2Solver(2) {}
+        Puzzle2SolverRecursiveK() : Day2Solver("recursive/checks for two bad jumps", 2) {}
 
         int computeSolution(std::vector<std::vector<unsigned int>> reports) override
         {
