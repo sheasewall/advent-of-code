@@ -161,6 +161,7 @@ bool isSafeDampenedDecreasingRecursiveK(std::vector<unsigned int> report, int in
     return isSafeDampenedDecreasingRecursiveK(report, index + 1, lowHP, false);
 }
 
+// ALMOST WORKS
 bool isSafeDampenedRecursiveK(std::vector<unsigned int> report)
 {
     return (isSafeDampenedIncreasingRecursiveK(report, 0, false, false) || isSafeDampenedDecreasingRecursiveK(report, 0, false, false));
@@ -303,6 +304,7 @@ namespace day2
         }
     };
 
+    // ALMOST WORKS
     class Puzzle2SolverRecursiveK : public Day2Solver
     {
     public:

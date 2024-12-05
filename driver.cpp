@@ -23,10 +23,9 @@ void timeDay2()
     day2::Puzzle2SolverRecursive d2p2Recursive = day2::Puzzle2SolverRecursive();
     d2p2Recursive.reportDefaultTrials(params);
 
+    // ALMOST WORKS
     day2::Puzzle2SolverRecursiveK d2p2RecursiveK = day2::Puzzle2SolverRecursiveK();
     d2p2RecursiveK.reportDefaultTrials(params);
-
-    // d2p1.computeSolution(); doesn't work, but d2p1.day2::Day2Solver::computeSolution(); does
 }
 
 int main(int argc, char *argv[])
