@@ -51,7 +51,7 @@ class Solver:
         return self.solution_parser(solution_file_name)[self.puzzle - 1]
     
     def time_solver(self, num_batches, num_reps, data=None, input_file_name=None):
-        if data:
+        if data is not None:
             time = min(timeit.repeat(lambda: self.compute_solution(data), number=num_reps, repeat=num_batches))
         else:
             time = min(timeit.repeat(lambda: self.compute_solution(input_file_name=input_file_name), number=num_reps, repeat=num_batches))

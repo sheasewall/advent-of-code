@@ -1,5 +1,15 @@
 #include "solver.cpp"
 #include <sstream>
+#include <regex>
+
+int solve_puzzle_1(std::string str)
+{
+    std::regex mults_regex("(mul\\([0-9]{1,3},[0-9]{1,3}\\))");
+    
+
+// get_mults_pattern = re.compile("")
+// get_digits_pattern = re.compile("[0-9]{1,3}")
+}
 
 namespace day3
 {
@@ -31,3 +41,4 @@ namespace day3
         }
     };
 }
+
