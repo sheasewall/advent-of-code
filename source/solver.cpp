@@ -140,6 +140,12 @@ void Solver<T, S>::reportTrial(std::string input_file_name, std::string solution
 }
 
 template <typename T, typename S>
+void Solver<T, S>::reportDefaultVerification()
+{
+    reportVerification(getInputFileName(), getSolutionFileName());
+}
+
+template <typename T, typename S>
 void Solver<T, S>::reportDefaultTrials(std::array<TrialParameters, 2> params)
 {
     if (params[0].must_parse == params[1].must_parse)

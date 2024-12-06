@@ -57,6 +57,8 @@ namespace solve
 
         void reportVerification(std::string input_file_name, std::string solution_file_name);
         void reportTrial(std::string input_file_name, std::string solution_file_name, TrialParameters params);
+        
+        void reportDefaultVerification();
         void reportDefaultTrials(std::array<TrialParameters, 2> params);
 
         std::string getInputFileName();

@@ -34,6 +34,8 @@ int main(int argc, char *argv[])
     // solve::TrialParameters non_parsing = {false, 1, 5};
     // std::array<solve::TrialParameters, 2> params = {parsing, non_parsing};
     day5::Puzzle1Solver d5p1 = day5::Puzzle1Solver();
+    d5p1.reportDefaultVerification();
     d5p1.reportVerification("day5/test.txt", "day5/testsols.txt");
+    
     return 0;
 }
