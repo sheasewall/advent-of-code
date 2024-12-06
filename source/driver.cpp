@@ -48,10 +48,10 @@ int main(int argc, char *argv[])
 {
 
     day5::Puzzle1Solver d5p1 = day5::Puzzle1Solver();
-    d5p1.reportDefaultTrials(getQuickParams());
+    d5p1.reportDefaultTrials(getDefaultParams());
 
     day5::Puzzle2Solver d5p2 = day5::Puzzle2Solver();
-    d5p2.reportDefaultTrials(getQuickParams());
+    d5p2.reportDefaultTrials(getDefaultParams());
     // d5p2.reportDefaultVerification();
     // d5p2.reportVerification("day5/test.txt", "day5/testsols.txt");
 
