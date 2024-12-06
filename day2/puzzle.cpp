@@ -3,7 +3,7 @@
 #include <vector>
 #include <sstream>
 
-#include "../solver.cpp"
+#include "../headers/solver.h"
 
 std::vector<unsigned int> parseReport(std::string line)
 {
@@ -230,7 +230,7 @@ int countSafety(std::vector<std::vector<unsigned int>> reports, bool (*pSafetyDe
 
 namespace day2
 {
-    class Day2Solver : public Solver<std::vector<std::vector<unsigned int>>, int>
+    class Day2Solver : public solve::Solver<std::vector<std::vector<unsigned int>>, int>
     {
     public:
         Day2Solver(std::string name, int puzzle_index) : Solver(name, 2, puzzle_index) {}

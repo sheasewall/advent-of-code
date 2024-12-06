@@ -5,38 +5,14 @@
 #include <fstream>
 #include <iostream>
 
-template <typename K>
-struct VerificationResults
-{
-    bool is_correct;
-    K computed_solution;
-    K correct_solution;
+#include "../headers/solver.h"
 
-    VerificationResults(K computed_solution, K correct_solution)
-    {
-        this->is_correct = (computed_solution == correct_solution);
-        this->computed_solution = computed_solution;
-        this->correct_solution = correct_solution;
-    }
-};
-
-struct TrialParameters
-{
-    bool must_parse;
-    int num_batches;
-    int num_reps;
-};
-
-template <typename K>
-struct TrialResults
-{
-    long best_avg;
-    VerificationResults<K> verification;
-};
+using namespace solve;
 
 // Specialization for int type
-template<typename S>
-std::vector<int> defaultParseSolutionFile(std::string file_name) {
+template <typename S>
+std::vector<int> defaultParseSolutionFile(std::string file_name)
+{
     std::ifstream file(file_name);
     std::string str;
     std::vector<int> solutions;
@@ -48,32 +24,16 @@ std::vector<int> defaultParseSolutionFile(std::string file_name) {
 }
 
 template <typename T, typename S>
-class Solver
+std::vector<S> Solver<T, S>::parseSolutionFile(std::string file_name)
 {
-private:
-    std::string name;
-    int day_index;
-    int puzzle_index;
+    return defaultParseSolutionFile<S>(file_name);
+}
 
-public:
-    Solver(std::string name, int day_index, int puzzle_index);
-
-    virtual T parseInputFile(std::string file_name) = 0;
-    virtual S computeSolution(T input_data) = 0;
-    virtual std::vector<S> parseSolutionFile(std::string file_name) { return defaultParseSolutionFile<S>(file_name); }
-
-    S getCorrectSolution(std::string file_name) { return parseSolutionFile(file_name)[puzzle_index - 1]; }
-    VerificationResults<S> verify(std::string input_file_name, std::string solution_file_name);
-    TrialResults<S> trial(std::string input_file_name, std::string solution_file_name, TrialParameters params);
-
-    void reportVerification(std::string input_file_name, std::string solution_file_name);
-    void reportTrial(std::string input_file_name, std::string solution_file_name, TrialParameters params);
-    void reportDefaultTrials(std::array<TrialParameters,2> params);
-
-    std::string getInputFileName();
-    std::string getSolutionFileName();
-    std::string getName();
-};
+template <typename T, typename S>
+S Solver<T, S>::getCorrectSolution(std::string file_name)
+{
+    return parseSolutionFile(file_name)[puzzle_index - 1];
+}
 
 template <typename T, typename S>
 Solver<T, S>::Solver(std::string name, int day_index, int puzzle_index)
@@ -180,7 +140,7 @@ void Solver<T, S>::reportTrial(std::string input_file_name, std::string solution
 }
 
 template <typename T, typename S>
-void Solver<T, S>::reportDefaultTrials(std::array<TrialParameters,2> params) 
+void Solver<T, S>::reportDefaultTrials(std::array<TrialParameters, 2> params)
 {
     if (params[0].must_parse == params[1].must_parse)
     {

@@ -141,6 +141,24 @@ def solve_puzzle2_newline(array):
     # both stretches necessarily have a single newline contained 
     # within it. 
     offset = array[0].size - 2
-    return count_mas_xs(array, f"(.|\\n){{{offset}}}.A.(.|\\n){{{offset}}}", '\n')
+    middle_section = f"(.|\\n){{{offset}}}.A.(.|\\n){{{offset}}}"
+    return count_mas_xs(array, middle_section, '\n')
 
 puzzle2_solver_new_line = solver.Solver("newline", 4, 2, parse_word_search_simpler, solve_puzzle2_newline)
+
+def count_kura(array, middle_section, pad_with):
+    array = np.pad(array, ((0, 0), (0, 1)), constant_values=pad_with)
+    rows = array.flatten('C').tolist()
+    rows_concatenated = ''.join(rows)
+    
+    x = f'(?=(M|S).(S|M){middle_section}(?!\2)[MS].(?!\1)[MS])'
+    x_regex = re.compile(x)
+    
+    return len(re.findall(x_regex, rows_concatenated))
+
+def solve_puzzle2_kura(array):
+    offset = array[0].size - 1
+    middle_section = f".{{{offset}}}A.{{{offset}}}"
+    return count_kura(array, middle_section, pad_with=0)
+
+puzzle2_solver_kura = solver.Solver("kura", 4, 2, parse_word_search_simpler, solve_puzzle2_kura)

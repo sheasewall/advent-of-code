@@ -1,6 +1,7 @@
-#include "solver.cpp"
 #include <sstream>
 #include <regex>
+
+#include "../headers/solver.h"
 
 int solve_puzzle_1(std::string str)
 {
