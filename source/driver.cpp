@@ -3,13 +3,30 @@
 #include "../day5/puzzle.cpp"
 // #include "day5/puzzle.cpp"
 
+std::array<solve::TrialParameters, 2> getDefaultParams()
+{
+    static const solve::TrialParameters parsing = {true, 5, 100};
+    static const solve::TrialParameters non_parsing = {false, 5, 50};
+    return {parsing, non_parsing};
+}
+
+std::array<solve::TrialParameters, 2> getQuickParams()
+{
+    static const solve::TrialParameters parsing = {true, 1, 10};
+    static const solve::TrialParameters non_parsing = {false, 1, 5};
+    return {parsing, non_parsing};
+}
+
+std::array<solve::TrialParameters, 2> getLongParams()
+{
+    static const solve::TrialParameters parsing = {true, 5, 5000};
+    static const solve::TrialParameters non_parsing = {false, 10, 200};
+    return {parsing, non_parsing};
+}
 
 void timeDay2()
 {
-    solve::TrialParameters parsing = {true, 5, 100};
-    solve::TrialParameters non_parsing = {false, 10, 50};
-    std::array<solve::TrialParameters, 2> params = {parsing, non_parsing};
-
+    auto params = getDefaultParams();
     day2::Puzzle1Solver d2p1 = day2::Puzzle1Solver();
     d2p1.reportDefaultTrials(params);
 
@@ -29,13 +46,14 @@ void timeDay2()
 
 int main(int argc, char *argv[])
 {
-    // timeDay2();
-    // solve::TrialParameters parsing = {true, 1, 10};
-    // solve::TrialParameters non_parsing = {false, 1, 5};
-    // std::array<solve::TrialParameters, 2> params = {parsing, non_parsing};
+
     day5::Puzzle1Solver d5p1 = day5::Puzzle1Solver();
-    d5p1.reportDefaultVerification();
-    d5p1.reportVerification("day5/test.txt", "day5/testsols.txt");
-    
+    d5p1.reportDefaultTrials(getQuickParams());
+
+    day5::Puzzle2Solver d5p2 = day5::Puzzle2Solver();
+    d5p2.reportDefaultTrials(getQuickParams());
+    // d5p2.reportDefaultVerification();
+    // d5p2.reportVerification("day5/test.txt", "day5/testsols.txt");
+
     return 0;
 }
