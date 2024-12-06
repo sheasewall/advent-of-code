@@ -15,3 +15,9 @@ Stats:
     - `Puzzle 2: 2206 microseconds`
   - C++
     - `Puzzle 1: 3153 microseconds`
+
+
+- Day 5:
+  - C++
+    - `Puzzle 1: 257 μs, 2828 μs parsing`
+    - `Puzzle 2: 350 μs, 2950 μs parsing`

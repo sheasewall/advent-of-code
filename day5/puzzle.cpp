@@ -150,7 +150,7 @@ namespace day5
     class Puzzle1Solver : public Day5Solver
     {
     public:
-        Puzzle1Solver() : Day5Solver("printing", 1) {}
+        Puzzle1Solver() : Day5Solver("uses 100x100 rule table", 1) {}
 
         int computeSolution(Manifest manifest) override
         {
@@ -161,7 +161,7 @@ namespace day5
     class Puzzle2Solver : public Day5Solver
     {
     public:
-        Puzzle2Solver() : Day5Solver("", 2) {}
+        Puzzle2Solver() : Day5Solver("calcs # of incoming rules", 2) {}
 
         int computeSolution(Manifest manifest) override
         {

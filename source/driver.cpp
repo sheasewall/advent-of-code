@@ -1,7 +1,5 @@
-// #include "day1/puzzle2.cpp"
 #include "../day2/puzzle.cpp"
 #include "../day5/puzzle.cpp"
-// #include "day5/puzzle.cpp"
 
 std::array<solve::TrialParameters, 2> getDefaultParams()
 {
@@ -44,16 +42,18 @@ void timeDay2()
     d2p2RecursiveK.reportDefaultTrials(params);
 }
 
-int main(int argc, char *argv[])
+void timeDay5() 
 {
-
     day5::Puzzle1Solver d5p1 = day5::Puzzle1Solver();
-    d5p1.reportDefaultTrials(getDefaultParams());
+    d5p1.reportDefaultTrials(getLongParams());
 
     day5::Puzzle2Solver d5p2 = day5::Puzzle2Solver();
-    d5p2.reportDefaultTrials(getDefaultParams());
-    // d5p2.reportDefaultVerification();
-    // d5p2.reportVerification("day5/test.txt", "day5/testsols.txt");
+    d5p2.reportDefaultTrials(getLongParams());
+}
+
+int main(int argc, char *argv[])
+{
+    timeDay5();
 
     return 0;
 }
