@@ -43,7 +43,7 @@ void timeDay2()
     d2p2RecursiveK.reportDefaultTrials(params);
 }
 
-void timeDay5() 
+void timeDay5()
 {
     day5::Puzzle1Solver d5p1 = day5::Puzzle1Solver();
     d5p1.reportDefaultTrials(getLongParams());
@@ -55,7 +55,11 @@ void timeDay5()
 int main(int argc, char *argv[])
 {
     day6::Puzzle1Solver d6p1 = day6::Puzzle1Solver();
+    // d6p1.reportVerification("day6/test.txt", "day6/test sols.txt");
     d6p1.reportDefaultTrials(getDefaultParams());
 
+    day6::Puzzle2Solver d6p2 = day6::Puzzle2Solver();
+    d6p2.reportVerification("day6/test.txt", "day6/test sols.txt");
+    d6p2.reportDefaultVerification();
     return 0;
 }

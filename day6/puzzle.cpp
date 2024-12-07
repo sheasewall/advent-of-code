@@ -5,7 +5,7 @@
 #include "../headers/solver.h"
 #include "../headers/utils.h"
 
-enum Tile
+enum TileType
 {
     Unexplored,
     Explored,
@@ -18,7 +18,18 @@ enum Direction
     North,
     East,
     South,
-    West
+    West,
+    Undef
+};
+
+struct Tile
+{
+    TileType type;
+    Direction last_visited; // Use a pointer for optional direction
+
+    // Constructor for convenience
+    Tile(TileType t = TileType::Unexplored, Direction d = Direction::Undef)
+        : type(t), last_visited(d) {}
 };
 
 struct Turtle
@@ -28,6 +39,16 @@ struct Turtle
     int y;
     Direction facing;
     int visited = 0;
+    int loopers = 0;
+
+    bool hasBeenHere(Tile *ahead)
+    {
+        if (ahead->last_visited == facing)
+        {
+            return true;
+        }
+        return false;
+    }
 
     Tile *checkAhead()
     {
@@ -41,6 +62,9 @@ struct Turtle
             return &map[y + 1][x];
         case West:
             return &map[y][x - 1];
+        default:
+            std::throw_with_nested(std::runtime_error("Turtle needs a direction to check ahead"));
+            break;
         }
     }
 
@@ -60,6 +84,9 @@ struct Turtle
         case West:
             facing = North;
             return;
+        default:
+            std::throw_with_nested(std::runtime_error("Turtle needs a direction to rotate"));
+            break;
         }
     }
 
@@ -79,37 +106,73 @@ struct Turtle
         case West:
             x--;
             break;
+        default:
+            std::throw_with_nested(std::runtime_error("Turtle needs a direction to advance"));
+            break;
         }
     }
 
     bool move()
     {
         Tile *ahead = checkAhead();
-        switch (*ahead)
+        switch (ahead->type)
         {
-        case Offsite:
+        case TileType::Offsite:
             return false;
-        case Obstacle:
-            rotate();
-            break;
-        case Unexplored:
-            visited++;
-            *ahead = Explored;
+        case TileType::Explored:
+            if (hasBeenHere(ahead))
+            {
+                loopers++;
+                return false;
+            }
+            //ahead->last_visited = facing;
             advance();
             break;
-        case Explored:
+        case TileType::Obstacle:
+            rotate();
+            break;
+        case TileType::Unexplored:
+            visited++;
+            ahead->type = TileType::Explored;
+            ahead->last_visited = facing;
             advance();
             break;
         }
         return true;
     }
 
+    Tile placeObstruction()
+    {
+        Tile saved = *checkAhead();
+        Tile *to_change = checkAhead();
+        *to_change = Tile(TileType::Obstacle, Direction::Undef);
+        return saved;
+    }
+    void removeObstruction(Tile to_replace)
+    {
+        Tile *to_change = checkAhead();
+        *to_change = to_replace;
+    }
+
     int testObstruction()
-    {   
-        if (*checkAhead() != Tile::Offsite)
+    {
+        int save_x = x;
+        int save_y = y;
+        int save_visited = visited;
+        Direction save_direction = facing;
+
+        Tile saved = placeObstruction();
+        while (move())
         {
-            
+            ;
         }
+        removeObstruction(saved);
+
+        x = save_x;
+        y = save_y;
+        visited = save_visited;
+        facing = save_direction;
+
         return 0;
     }
 
@@ -136,23 +199,26 @@ struct Turtle
                     case West:
                         os << '<';
                         break;
+                    default:
+                        os << '?';
+                        break;
                     }
                 }
                 else
                 {
                     // Show map tiles
-                    switch (turtle.map[y][x])
+                    switch (turtle.map[y][x].type)
                     {
-                    case Unexplored:
+                    case TileType::Unexplored:
                         os << '.';
                         break;
-                    case Explored:
+                    case TileType::Explored:
                         os << 'X';
                         break;
-                    case Obstacle:
+                    case TileType::Obstacle:
                         os << '#';
                         break;
-                    case Offsite:
+                    case TileType::Offsite:
                         os << ' ';
                         break;
                     }
@@ -173,6 +239,8 @@ namespace day6
 
         Turtle parseInputFile(std::string file_name) override
         {
+            Direction north = Direction::North;
+
             Turtle turtle = Turtle();
             // To be padded later
             turtle.map.push_back(std::vector<Tile>());
@@ -186,23 +254,22 @@ namespace day6
             {
                 input_y++;
                 input_x = 0;
-                std::vector<Tile> row = {Tile::Offsite};
+                std::vector<Tile> row = {Tile(TileType::Offsite)};
                 for (char c : line)
                 {
                     input_x++;
                     switch (c)
                     {
                     case '#':
-                        row.push_back(Tile::Obstacle);
+                        row.push_back(Tile(TileType::Obstacle));
                         break;
                     case '.':
-                        row.push_back(Tile::Unexplored);
+                        row.push_back(Tile(TileType::Unexplored));
                         break;
                     case '^':
                         turtle.x = input_x;
-                        turtle.y = input_y;
-                        turtle.facing = Direction::North;
-                        row.push_back(Tile::Explored);
+                        turtle.y = input_y - 1;
+                        row.push_back(Tile(TileType::Explored, Direction::North));
                         turtle.visited++;
                         break;
                     default:
@@ -210,12 +277,12 @@ namespace day6
                         break;
                     }
                 }
-                row.push_back(Tile::Offsite);
+                row.push_back(Tile(TileType::Offsite));
                 turtle.map.push_back(row);
             }
-            turtle.map.push_back(std::vector<Tile>(turtle.map[1].size(), Tile::Offsite));
+            turtle.map.push_back(std::vector<Tile>(turtle.map[1].size(), Tile(TileType::Offsite)));
             // Padding the first line now that we know how long a row should be
-            turtle.map[0] = std::vector<Tile>(turtle.map[1].size(), Tile::Offsite);
+            turtle.map[0] = std::vector<Tile>(turtle.map[1].size(), Tile(TileType::Offsite));
 
             return turtle;
         }
@@ -228,7 +295,8 @@ namespace day6
 
         int computeSolution(Turtle turtle) override
         {
-            while (turtle.move());
+            while (turtle.move())
+                ;
             return turtle.visited;
         }
     };
@@ -240,12 +308,16 @@ namespace day6
 
         int computeSolution(Turtle turtle) override
         {
+            std::vector<std::vector<Tile>> saved_map = turtle.map;
             int possible_obstructions = turtle.testObstruction();
+            turtle.map = saved_map;
             while (turtle.move())
             {
-                turtle.testObstruction();
+                std::vector<std::vector<Tile>> saved_map = turtle.map;
+                possible_obstructions += turtle.testObstruction();
+                turtle.map = saved_map;
             }
-            return int();
+            return turtle.loopers;
         }
     };
 }
