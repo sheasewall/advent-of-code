@@ -1,5 +1,6 @@
 #include "../day2/puzzle.cpp"
 #include "../day5/puzzle.cpp"
+#include "../day6/puzzle.cpp"
 
 std::array<solve::TrialParameters, 2> getDefaultParams()
 {
@@ -53,7 +54,8 @@ void timeDay5()
 
 int main(int argc, char *argv[])
 {
-    timeDay5();
+    day6::Puzzle1Solver d6p1 = day6::Puzzle1Solver();
+    d6p1.reportDefaultTrials(getDefaultParams());
 
     return 0;
 }
