@@ -9,30 +9,45 @@
 
 using namespace solve;
 
-// Specialization for int type
-template <typename S>
-std::vector<int> defaultParseSolutionFile(std::string file_name)
-{
-    std::ifstream file(file_name);
-    std::string str;
-    std::vector<int> solutions;
-    std::getline(file, str);
-    solutions.push_back(std::stoi(str));
-    std::getline(file, str);
-    solutions.push_back(std::stoi(str));
-    return solutions;
-}
+// // Specialization for int type
+// template <typename S>
+// std::vector<int> defaultParseSolutionFile(std::string file_name)
+// {
+//     std::ifstream file(file_name);
+//     std::string str;
+//     std::vector<int> solutions;
+//     std::getline(file, str);
+//     solutions.push_back(std::stoi(str));
+//     std::getline(file, str);
+//     solutions.push_back(std::stoi(str));
+//     return solutions;
+// }
 
-template <typename T, typename S>
-std::vector<S> Solver<T, S>::parseSolutionFile(std::string file_name)
-{
-    return defaultParseSolutionFile<S>(file_name);
-}
+// template <typename S>
+// std::vector<long> defaultParseSolutionFile(std::string file_name)
+// {
+//     std::ifstream file(file_name);
+//     std::string str;
+//     std::vector<long> solutions;
+//     std::getline(file, str);
+//     solutions.push_back(std::stol(str));
+//     std::getline(file, str);
+//     solutions.push_back(std::stol(str));
+//     return solutions;
+// }
+
+// template <typename T, typename S>
+// std::vector<S> Solver<T, S>::parseSolutionFile(std::string file_name)
+// {
+//     return defaultParseSolutionFile<S>(file_name);
+// }
+
+
 
 template <typename T, typename S>
 S Solver<T, S>::getCorrectSolution(std::string file_name)
 {
-    return parseSolutionFile(file_name)[puzzle_index - 1];
+    return SolutionFileParser<S>::parseSolutionFile(file_name)[puzzle_index - 1];
 }
 
 template <typename T, typename S>

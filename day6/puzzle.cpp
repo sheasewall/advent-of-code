@@ -1,6 +1,8 @@
 #include <exception>
 #include <stdexcept>
 #include <iostream>
+#include <vector>
+#include <fstream>
 
 #include "../headers/solver.h"
 #include "../headers/utils.h"
@@ -25,11 +27,17 @@ enum Direction
 struct Tile
 {
     TileType type;
-    Direction last_visited; // Use a pointer for optional direction
+    bool has_visited[4]; // Array to track visits from each direction
 
     // Constructor for convenience
-    Tile(TileType t = TileType::Unexplored, Direction d = Direction::Undef)
-        : type(t), last_visited(d) {}
+    Tile(TileType t = TileType::Unexplored)
+        : type(t)
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            has_visited[i] = false;
+        }
+    }
 };
 
 struct Turtle
@@ -40,14 +48,13 @@ struct Turtle
     Direction facing;
     int visited = 0;
     int loopers = 0;
+    int initial_x;
+    int initial_y;
+    std::vector<std::vector<Tile>> initial_map;
 
     bool hasBeenHere(Tile *ahead)
     {
-        if (ahead->last_visited == facing)
-        {
-            return true;
-        }
-        return false;
+        return ahead->has_visited[facing];
     }
 
     Tile *checkAhead()
@@ -70,24 +77,7 @@ struct Turtle
 
     void rotate()
     {
-        switch (facing)
-        {
-        case North:
-            facing = East;
-            return;
-        case East:
-            facing = South;
-            return;
-        case South:
-            facing = West;
-            return;
-        case West:
-            facing = North;
-            return;
-        default:
-            std::throw_with_nested(std::runtime_error("Turtle needs a direction to rotate"));
-            break;
-        }
+        facing = static_cast<Direction>((facing + 1) % 4);
     }
 
     void advance()
@@ -125,7 +115,6 @@ struct Turtle
                 loopers++;
                 return false;
             }
-            //ahead->last_visited = facing;
             advance();
             break;
         case TileType::Obstacle:
@@ -134,46 +123,57 @@ struct Turtle
         case TileType::Unexplored:
             visited++;
             ahead->type = TileType::Explored;
-            ahead->last_visited = facing;
             advance();
             break;
         }
+        ahead->has_visited[facing] = true;
         return true;
     }
 
-    Tile placeObstruction()
-    {
-        Tile saved = *checkAhead();
-        Tile *to_change = checkAhead();
-        *to_change = Tile(TileType::Obstacle, Direction::Undef);
-        return saved;
-    }
-    void removeObstruction(Tile to_replace)
-    {
-        Tile *to_change = checkAhead();
-        *to_change = to_replace;
-    }
+    // Tile placeObstruction()
+    // {
+    //     Tile saved = *checkAhead();
+    //     Tile *to_change = checkAhead();
+    //     *to_change = Tile(TileType::Obstacle);
+    //     return saved;
+    // }
 
-    int testObstruction()
+    // void removeObstruction(Tile to_replace)
+    // {
+    //     Tile *to_change = checkAhead();
+    //     *to_change = to_replace;
+    // }
+
+    void testObstruction()
     {
+        Tile *ahead = checkAhead();
+        if (ahead->type == TileType::Explored)
+        {
+            return;
+        }
+
         int save_x = x;
         int save_y = y;
         int save_visited = visited;
+        std::vector<std::vector<Tile>> save_map = map;
         Direction save_direction = facing;
 
-        Tile saved = placeObstruction();
+        x = initial_x;
+        y = initial_y;
+        // This operation is probably expensive
+        map = initial_map;
+        ahead->type = TileType::Obstacle;
+        facing = Direction::North;
         while (move())
         {
             ;
         }
-        removeObstruction(saved);
 
         x = save_x;
         y = save_y;
         visited = save_visited;
+        map = save_map;
         facing = save_direction;
-
-        return 0;
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Turtle &turtle)
@@ -207,20 +207,85 @@ struct Turtle
                 else
                 {
                     // Show map tiles
-                    switch (turtle.map[y][x].type)
+                    const Tile &tile = turtle.map[y][x];
+                    if (tile.type == TileType::Unexplored)
                     {
-                    case TileType::Unexplored:
                         os << '.';
-                        break;
-                    case TileType::Explored:
-                        os << 'X';
-                        break;
-                    case TileType::Obstacle:
+                    }
+                    else if (tile.type == TileType::Explored)
+                    {
+                        if (tile.has_visited[North] && tile.has_visited[East] && tile.has_visited[South] && tile.has_visited[West])
+                        {
+                            os << "╬"; // All directions
+                        }
+                        else if (tile.has_visited[North] && tile.has_visited[South] && tile.has_visited[East])
+                        {
+                            os << "╠"; // North, South, East
+                        }
+                        else if (tile.has_visited[North] && tile.has_visited[South] && tile.has_visited[West])
+                        {
+                            os << "╣"; // North, South, West
+                        }
+                        else if (tile.has_visited[East] && tile.has_visited[South] && tile.has_visited[West])
+                        {
+                            os << "╦"; // East, South, West
+                        }
+                        else if (tile.has_visited[North] && tile.has_visited[East] && tile.has_visited[West])
+                        {
+                            os << "╩"; // North, East, West
+                        }
+                        else if (tile.has_visited[North] && tile.has_visited[South])
+                        {
+                            os << "║"; // North, South
+                        }
+                        else if (tile.has_visited[East] && tile.has_visited[West])
+                        {
+                            os << "═"; // East, West
+                        }
+                        else if (tile.has_visited[North] && tile.has_visited[East])
+                        {
+                            os << "╚"; // North, East
+                        }
+                        else if (tile.has_visited[North] && tile.has_visited[West])
+                        {
+                            os << "╝"; // North, West
+                        }
+                        else if (tile.has_visited[South] && tile.has_visited[East])
+                        {
+                            os << "╔"; // South, East
+                        }
+                        else if (tile.has_visited[South] && tile.has_visited[West])
+                        {
+                            os << "╗"; // South, West
+                        }
+                        else if (tile.has_visited[North])
+                        {
+                            os << "↑"; // North
+                        }
+                        else if (tile.has_visited[East])
+                        {
+                            os << "→"; // East
+                        }
+                        else if (tile.has_visited[South])
+                        {
+                            os << "↓"; // South
+                        }
+                        else if (tile.has_visited[West])
+                        {
+                            os << "←"; // West
+                        }
+                        else
+                        {
+                            os << "X"; // Default for explored
+                        }
+                    }
+                    else if (tile.type == TileType::Obstacle)
+                    {
                         os << '#';
-                        break;
-                    case TileType::Offsite:
+                    }
+                    else if (tile.type == TileType::Offsite)
+                    {
                         os << ' ';
-                        break;
                     }
                 }
             }
@@ -252,6 +317,8 @@ namespace day6
 
             while (std::getline(file, line))
             {
+                Tile starting_explored = Tile(TileType::Explored);
+                starting_explored.has_visited[Direction::North] = true;
                 input_y++;
                 input_x = 0;
                 std::vector<Tile> row = {Tile(TileType::Offsite)};
@@ -269,7 +336,9 @@ namespace day6
                     case '^':
                         turtle.x = input_x;
                         turtle.y = input_y - 1;
-                        row.push_back(Tile(TileType::Explored, Direction::North));
+                        turtle.initial_x = turtle.x;
+                        turtle.initial_y = turtle.y;
+                        row.push_back(starting_explored);
                         turtle.visited++;
                         break;
                     default:
@@ -283,7 +352,8 @@ namespace day6
             turtle.map.push_back(std::vector<Tile>(turtle.map[1].size(), Tile(TileType::Offsite)));
             // Padding the first line now that we know how long a row should be
             turtle.map[0] = std::vector<Tile>(turtle.map[1].size(), Tile(TileType::Offsite));
-
+            // This is the most expensive operation for problem 1.
+            turtle.initial_map = turtle.map;
             return turtle;
         }
     };
@@ -308,14 +378,16 @@ namespace day6
 
         int computeSolution(Turtle turtle) override
         {
-            std::vector<std::vector<Tile>> saved_map = turtle.map;
-            int possible_obstructions = turtle.testObstruction();
-            turtle.map = saved_map;
+            if (turtle.checkAhead()->type != TileType::Obstacle && turtle.checkAhead()->type != TileType::Offsite)
+            {
+                turtle.testObstruction();
+            }
             while (turtle.move())
             {
-                std::vector<std::vector<Tile>> saved_map = turtle.map;
-                possible_obstructions += turtle.testObstruction();
-                turtle.map = saved_map;
+                if (turtle.checkAhead()->type != TileType::Obstacle && turtle.checkAhead()->type != TileType::Offsite)
+                {
+                    turtle.testObstruction();
+                }
             }
             return turtle.loopers;
         }
