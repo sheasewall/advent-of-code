@@ -104,54 +104,12 @@ namespace solve
         void reportDefaultVerification();
         void reportDefaultTrials(std::array<TrialParameters, 2> params);
 
+        // void test(std::chrono::duration<float> testing_time, float rep_to_batch);
+
         std::string getInputFileName();
         std::string getSolutionFileName();
         std::string getName();
     };
-
-    // template <typename T, typename S>
-    // std::vector<S> Solver<T, S>::parseSolutionFile(std::string file_name)
-    // {
-    //     throw std::runtime_error("parseSolutionFile not implemented for this type");
-    // }
-
-    // template <typename T, typename S>
-    // class Solver : public Solver<T, int>
-    // {
-    // public:
-    //     using Solver<T, int>::Solver;
-
-    //     std::vector<int> parseSolutionFile(std::string file_name) override
-    //     {
-    //         std::ifstream file(file_name);
-    //         std::string str;
-    //         std::vector<int> solutions;
-    //         std::getline(file, str);
-    //         solutions.push_back(std::stoi(str));
-    //         std::getline(file, str);
-    //         solutions.push_back(std::stoi(str));
-    //         return solutions;
-    //     }
-    // };
-
-    // template <typename T, typename S>
-    // class Solver : public Solver<T, long>
-    // {
-    // public:
-    //     using Solver<T, long>::Solver;
-
-    //     std::vector<long> parseSolutionFile(std::string file_name) override
-    //     {
-    //         std::ifstream file(file_name);
-    //         std::string str;
-    //         std::vector<long> solutions;
-    //         std::getline(file, str);
-    //         solutions.push_back(std::stol(str));
-    //         std::getline(file, str);
-    //         solutions.push_back(std::stol(str));
-    //         return solutions;
-    //     }
-    // };
 }
 
 #include "../source/solver.cpp"

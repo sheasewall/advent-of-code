@@ -3,6 +3,13 @@
 #include "../day6/puzzle.cpp"
 #include "../day7/puzzle.cpp"
 
+std::array<solve::TrialParameters, 2> getWickedFastParams()
+{
+    static const solve::TrialParameters parsing = {true, 2, 10};
+    static const solve::TrialParameters non_parsing = {false, 2, 5};
+    return {parsing, non_parsing};
+}
+
 std::array<solve::TrialParameters, 2> getDefaultParams()
 {
     static const solve::TrialParameters parsing = {true, 5, 100};
@@ -62,29 +69,15 @@ void timeDay6()
     d6p2.reportDefaultTrials(getDefaultParams());
 }
 
-// void test_generatePermutations()
-// {
-//     std::shared_ptr<std::vector<std::vector<int>>> permutations = std::make_shared<std::vector<std::vector<int>>>();
-//     std::vector<int> all_enums = {1, 2, 3};
-//     int depth = 3;
-
-//     utils::generatePermutations(permutations, depth, all_enums);
-
-//     std::cout << "Generated permutations:" << std::endl;
-//     for (const auto &permutation : *permutations)
-//     {
-//         for (int value : permutation)
-//         {
-//             std::cout << value << " ";
-//         }
-//         std::cout << std::endl;
-//     }
-// }
-
 int main(int argc, char *argv[])
 {
+    day7::Puzzle2Solver d7p2 = day7::Puzzle2Solver();
+    d7p2.reportVerification("day7/test.txt", "day7/test sols.txt");
+    d7p2.reportDefaultVerification();
+
     day7::Puzzle1Solver d7p1 = day7::Puzzle1Solver();
     d7p1.reportVerification("day7/test.txt", "day7/test sols.txt");
     d7p1.reportDefaultVerification();
+    // d7p1.reportDefaultTrials(getWickedFastParams());
     return 0;
 }

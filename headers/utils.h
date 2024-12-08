@@ -61,30 +61,6 @@ namespace utils
             }
         }
         to_fill->insert(to_fill->end(), new_permutations.begin(), new_permutations.end());
-        // if (depth == 1)
-        // {
-        //     for (MyEnum my_enum : all_enums)
-        //     {
-        //         std::vector<MyEnum> single = {my_enum};
-        //         to_fill->push_back(single);
-        //     }
-        // }
-        // if (depth == 2)
-        // {
-        //     generatePermutations(to_fill, 1, all_enums);
-
-        //     std::vector<std::vector<MyEnum>> new_permutations;
-        //     for (std::vector<MyEnum>& permutation : *to_fill)
-        //     {
-        //         for (MyEnum my_enum : all_enums)
-        //         {
-        //             std::vector<MyEnum> copy = permutation;
-        //             copy.push_back(my_enum);
-        //             new_permutations.push_back(copy);
-        //         }
-        //     }
-        //     to_fill->insert(to_fill->end(), new_permutations.begin(), new_permutations.end());
-        // }
     }
 }
 

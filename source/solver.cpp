@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <ratio>
 
 #include "../headers/solver.h"
 
@@ -41,8 +42,6 @@ using namespace solve;
 // {
 //     return defaultParseSolutionFile<S>(file_name);
 // }
-
-
 
 template <typename T, typename S>
 S Solver<T, S>::getCorrectSolution(std::string file_name)
@@ -170,3 +169,26 @@ void Solver<T, S>::reportDefaultTrials(std::array<TrialParameters, 2> params)
     reportTrial(getInputFileName(), getSolutionFileName(), params[0]);
     reportTrial(getInputFileName(), getSolutionFileName(), params[1]);
 }
+
+// template <typename T, typename S>
+// void Solver<T, S>::test(std::chrono::duration<float> testing_time, float rep_to_batch)
+// {
+//     static const solve::TrialParameters parsing = {true, 1, 1};
+//     static const solve::TrialParameters non_parsing = {false, 1, 1};
+//     long testing_time_us = std::chrono::microseconds(testing_time).count();
+//     TrialResults<S> results_parsing = trial(getInputFileName(), getSolutionFileName(), parsing);
+
+//     long target_parsing_test_time = testing_time_us / 2;
+//     long est_parsing_batch_time = 
+//     int num_parsing_batches = 0;
+//     int num_parsing_reps = 0;
+
+
+//     if(results_parsing.verification.is_correct)
+//     {
+
+//     }
+
+//     TrialResults<S> results_non_parsing = trial(getInputFileName(), getSolutionFileName(), non_parsing);
+
+// }
