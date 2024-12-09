@@ -24,13 +24,13 @@ enum Direction
     Undef
 };
 
-struct Tile
+struct TileEntity
 {
     TileType type;
     bool has_visited[4]; // Array to track visits from each direction
 
     // Constructor for convenience
-    Tile(TileType t = TileType::Unexplored)
+    TileEntity(TileType t = TileType::Unexplored)
         : type(t)
     {
         for (int i = 0; i < 4; ++i)
@@ -42,7 +42,7 @@ struct Tile
 
 struct Turtle
 {
-    std::vector<std::vector<Tile>> map;
+    std::vector<std::vector<TileEntity>> map;
     int x;
     int y;
     Direction facing;
@@ -50,14 +50,14 @@ struct Turtle
     int loopers = 0;
     int initial_x;
     int initial_y;
-    std::vector<std::vector<Tile>> initial_map;
+    std::vector<std::vector<TileEntity>> initial_map;
 
-    bool hasBeenHere(Tile *ahead)
+    bool hasBeenHere(TileEntity *ahead)
     {
         return ahead->has_visited[facing];
     }
 
-    Tile *checkAhead()
+    TileEntity *checkAhead()
     {
         switch (facing)
         {
@@ -104,7 +104,7 @@ struct Turtle
 
     bool move()
     {
-        Tile *ahead = checkAhead();
+        TileEntity *ahead = checkAhead();
         switch (ahead->type)
         {
         case TileType::Offsite:
@@ -130,23 +130,23 @@ struct Turtle
         return true;
     }
 
-    // Tile placeObstruction()
+    // TileEntity placeObstruction()
     // {
-    //     Tile saved = *checkAhead();
-    //     Tile *to_change = checkAhead();
-    //     *to_change = Tile(TileType::Obstacle);
+    //     TileEntity saved = *checkAhead();
+    //     TileEntity *to_change = checkAhead();
+    //     *to_change = TileEntity(TileType::Obstacle);
     //     return saved;
     // }
 
-    // void removeObstruction(Tile to_replace)
+    // void removeObstruction(TileEntity to_replace)
     // {
-    //     Tile *to_change = checkAhead();
+    //     TileEntity *to_change = checkAhead();
     //     *to_change = to_replace;
     // }
 
     void testObstruction()
     {
-        Tile *ahead = checkAhead();
+        TileEntity *ahead = checkAhead();
         if (ahead->type == TileType::Explored)
         {
             return;
@@ -155,7 +155,7 @@ struct Turtle
         int save_x = x;
         int save_y = y;
         int save_visited = visited;
-        std::vector<std::vector<Tile>> save_map = map;
+        std::vector<std::vector<TileEntity>> save_map = map;
         Direction save_direction = facing;
 
         x = initial_x;
@@ -207,7 +207,7 @@ struct Turtle
                 else
                 {
                     // Show map tiles
-                    const Tile &tile = turtle.map[y][x];
+                    const TileEntity &tile = turtle.map[y][x];
                     if (tile.type == TileType::Unexplored)
                     {
                         os << '.';
@@ -308,7 +308,7 @@ namespace day6
 
             Turtle turtle = Turtle();
             // To be padded later
-            turtle.map.push_back(std::vector<Tile>());
+            turtle.map.push_back(std::vector<TileEntity>());
             int input_x = 1;
             int input_y = 1;
 
@@ -317,21 +317,21 @@ namespace day6
 
             while (std::getline(file, line))
             {
-                Tile starting_explored = Tile(TileType::Explored);
+                TileEntity starting_explored = TileEntity(TileType::Explored);
                 starting_explored.has_visited[Direction::North] = true;
                 input_y++;
                 input_x = 0;
-                std::vector<Tile> row = {Tile(TileType::Offsite)};
+                std::vector<TileEntity> row = {TileEntity(TileType::Offsite)};
                 for (char c : line)
                 {
                     input_x++;
                     switch (c)
                     {
                     case '#':
-                        row.push_back(Tile(TileType::Obstacle));
+                        row.push_back(TileEntity(TileType::Obstacle));
                         break;
                     case '.':
-                        row.push_back(Tile(TileType::Unexplored));
+                        row.push_back(TileEntity(TileType::Unexplored));
                         break;
                     case '^':
                         turtle.x = input_x;
@@ -346,12 +346,12 @@ namespace day6
                         break;
                     }
                 }
-                row.push_back(Tile(TileType::Offsite));
+                row.push_back(TileEntity(TileType::Offsite));
                 turtle.map.push_back(row);
             }
-            turtle.map.push_back(std::vector<Tile>(turtle.map[1].size(), Tile(TileType::Offsite)));
+            turtle.map.push_back(std::vector<TileEntity>(turtle.map[1].size(), TileEntity(TileType::Offsite)));
             // Padding the first line now that we know how long a row should be
-            turtle.map[0] = std::vector<Tile>(turtle.map[1].size(), Tile(TileType::Offsite));
+            turtle.map[0] = std::vector<TileEntity>(turtle.map[1].size(), TileEntity(TileType::Offsite));
             // This is the most expensive operation for problem 1.
             turtle.initial_map = turtle.map;
             return turtle;

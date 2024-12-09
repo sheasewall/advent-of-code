@@ -23,5 +23,7 @@ Stats:
     - `Puzzle 2: 350 μs, 2950 μs parsing`
 - Day 7:
   - C++
-    - `Puzzle 1: 17.68s, 17.55s parsing`
-    - `Puzzle 2: - μs, - μs parsing`
+    - `Puzzle 1 (shared_ptr): 903ms, 921ms parsing`
+    - `Puzzle 1 (const ref): 810ms, 818ms parsing`
+    - `Puzzle 2 (shared_ptr): 20.7s, 22.3s parsing`
+    - `Puzzle 2 (const ref): , 21.6s, 21.5s parsing`
