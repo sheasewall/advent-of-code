@@ -2,35 +2,60 @@
 #include "../headers/utils.h"
 #include <array>
 
+#include "../source/recursive.cpp"
+
 namespace day8
 {
-    template <typename TileEntityType, typename coord_type, unsigned int Dim>
-    class TileEntity
+    template <typename EntityType, typename coord_type, unsigned int Dim>
+    class Entity
     {
     private:
-        TileEntityType entity;
-        std::array<coord_type, Dim> coords;
+        EntityType entity;
+        Vec<coord_type, Dim> coords;
 
     public:
         // Constructor
-        explicit TileEntity(const std::array<coord_type, Dim> &coordinates, const TileEntityType &tile_entity) : coords(coordinates), entity(tile_entity) {}
+        explicit Entity(const Vec<coord_type, Dim> &coordinates, const EntityType &tile_entity) : coords(coordinates), entity(tile_entity) {}
 
         // Getter - returns const reference to avoid copying
-        const std::array<coord_type, Dim> &getCoords() const { return coords; }
-        const TileEntityType &getEntity() const { return entity; }
+        const Vec<coord_type, Dim> &getCoords() const { return coords; }
+        const EntityType &getEntity() const { return entity; }
 
     private:
-        friend std::ostream &operator<<(std::ostream &os, const TileEntity &tile);
+        friend std::ostream &operator<<(std::ostream &os, const Entity &tile);
     };
 
-    template <typename TileEntityType, typename coord_type, unsigned int Dim>
-    std::ostream &operator<<(std::ostream &os, const TileEntity<TileEntityType, coord_type, Dim> &tile)
+    template <typename EntityType, typename coord_type, unsigned int Dim>
+    std::ostream &operator<<(std::ostream &os, const Entity<EntityType, coord_type, Dim> &tile)
     {
         os << tile.getEntity() << ": " << tile.getCoords() << std::endl;
         return os;
     }
 
-    // template <typename TileEntityType, typename coord_type, unsigned int Dim>
+    ///
+    template <typename BaseEntity, typename coord_type, unsigned int Dim>
+    class GridWorld
+    {
+    private:
+        NVector<std::shared_ptr<BaseEntity>, Dim> world;
+        std::vector<std::shared_ptr<BaseEntity>> entities;
+
+    public:
+        void spawn(BaseEntity);
+        void despawn(BaseEntity);
+    };
+
+    template <typename BaseEntity, typename coord_type, unsigned int Dim>
+    void GridWorld<BaseEntity, coord_type, Dim>::spawn(BaseEntity entity)
+    {
+        std::shared_ptr<BaseEntity> p_entity = std::make_shared<BaseEntity>(entity);
+        world.putElement(p_entity);
+        entities.push_back(p_entity);
+    }
+
+    ///
+
+    // template <typename EntityType, typename coord_type, unsigned int Dim>
     // class TileGrid
     // {
     // public:
@@ -38,7 +63,7 @@ namespace day8
 
     // private:
     //     unsigned int dim = Dim;
-    //     Matrix<TileEntity<TileEntityType, coord_type, Dim>, Dim, coord_type> grid;
+    //     Matrix<TileEntity<EntityType, coord_type, Dim>, Dim, coord_type> grid;
     // };
 
     // class Day8Solver : public solve::Solver<TileGrid<Tile<char, 2>, 2>, int>

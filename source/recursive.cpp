@@ -1,5 +1,6 @@
 #include <vector>
 #include <array>
+#include <iostream>
 
 template <typename X, unsigned int Dim>
 class Vec
@@ -135,6 +136,7 @@ class NVector
     NVector& operator=(const NVector &v) = delete;
     NVector& operator=(NVector &&v) = delete;
     NVector<T, Dim - 1>& operator[](const typename std::vector<T>::size_type &i);
+    T& getElement(std::array<typename std::vector<T>::size_type, Dim> coords);
 
     void resize(std::array<typename std::vector<T>::size_type, Dim> widths);
 };
@@ -163,6 +165,15 @@ NVector<T, Dim - 1>& NVector<T, Dim>::operator[](const typename std::vector<T>::
     return internal_vec[i];
 }
 
+template <typename T, unsigned int Dim>
+T& NVector<T, Dim>::getElement(std::array<typename std::vector<T>::size_type, Dim> coords)
+{
+    NVector<T, Dim - 1>& sub_nvec = internal_vec[coords.front()];
+    std::array<typename std::vector<T>::size_type, Dim - 1> sub_coords;
+    std::copy(coords.begin() + 1, coords.end(), sub_coords.begin());
+    return sub_nvec.getElement(sub_coords);
+}
+
 /// 
 
 template <typename T>
@@ -179,6 +190,7 @@ public:
     NVector& operator=(const NVector &v) = delete;
     NVector& operator=(NVector &&v) = delete;
     T& operator[](const typename std::vector<T>::size_type &i);
+    T& getElement(std::array<typename std::vector<T>::size_type, 1> coords);
 
     void resize(std::array<typename std::vector<T>::size_type, 1> width);
     // std::vector<T&> wave(std::array<const typename std::vector<T>::size_type&, 1> v);
@@ -202,10 +214,8 @@ T& NVector<T, 1>::operator[](const typename std::vector<T>::size_type &i)
     return internal_vec[i];
 }
 
-// template <typename T>
-// std::vector<T&> NVector<T, 1>::wave(std::array<const typename std::vector<T>::size_type&, 1> v)
-// {
-//     std::vector<T&> hit;
-
-// }
-
+template <typename T>
+T& NVector<T, 1>::getElement(std::array<typename std::vector<T>::size_type, 1> coords)
+{
+    return internal_vec[coords[0]];
+}
