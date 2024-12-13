@@ -34,7 +34,7 @@ class HyperArray
         static_assert(sizeof...(coords) == Dim, "Number of coordinates must match the dimension of the array");
         HyperArrayConstructor(coords...);
     } 
-    HyperArray(std::array<size_type, Dim> coords) : internal_arr();
+    //HyperArray(std::array<size_type, Dim> coords) : internal_arr();
 
     template <typename... Coords> 
     void HyperArrayConstructor(size_type index, Coords... coords);
@@ -77,7 +77,6 @@ void HyperArray<T, Dim, size_type, list_type>::placeElementHelper(const T& el, s
     internal_arr.resize(index + 1);
     internal_arr[index] = el;
 }
-
 
 template <typename T, unsigned int Dim, typename size_type, template <typename _Tp, typename _Ap> class list_type>
 template <typename... Coords>

@@ -3,6 +3,10 @@
 
 #include "../headers/utils.h"
 
+#include "narray.cpp"
+#include "grid.cpp"
+#include "recursive.cpp"
+
 using namespace utils;
 
 std::vector<std::string> utils::split(const std::string &s, char delim)

@@ -79,7 +79,6 @@ class NArray
     NArray(const NArray &v) = delete;
     NArray(NArray &&v) : internal_vec(std::move(v.internal_vec))
     {
-        std::cout << "copy cons" << std::endl;
     }
     NArray &operator=(const NArray &v) = delete;
     NArray &operator=(NArray &&v) = delete;
@@ -173,7 +172,6 @@ class NArray<T, 1, Index>
     NArray(const NArray &v) = delete;
     NArray(NArray &&v) : internal_vec(std::move(v.internal_vec))
     {
-        std::cout << "copy cons 1d" << std::endl;
     }
     NArray &operator=(const NArray &v) = delete;
     NArray &operator=(NArray &&v) = delete;
@@ -425,32 +423,37 @@ std::vector<std::weak_ptr<Entity<E, Dim, Index>>> DiscretePtrWorld2<E, Dim, Inde
     return weak_entities_of;
 }
 
+// template <typename E, unsigned int Dim, typename Index>
+// std::vector<std::weak_ptr<Entity<E, Dim, Index>>> DiscretePtrWorld2<E, Dim, Index>::getEntitiesMatching(const Entity<E, Dim, Index>& entity) {
+//     std::vector<WeakEntityPtr> matching_type = getEntitiesOf(entity.entity);
+//     std::vector<WeakEntityPtr> matching_both;
+//     std::copy_if(matching_type.begin(), matching_type.end(), std::back_inserter(matching_both), 
+//                  [&entity](const WeakEntityPtr& weak_e_ptr) {
+//                     if (auto e_ptr = weak_e_ptr.lock()) {
+//                         return e_ptr->coords == entity.coords;
+//                     }
+//                     return false;
+//                  });
+//     return matching_both;
+// }
+
 template <typename E, unsigned int Dim, typename Index>
 std::vector<std::weak_ptr<Entity<E, Dim, Index>>> DiscretePtrWorld2<E, Dim, Index>::getEntitiesMatching(const Entity<E, Dim, Index>& entity) {
-    std::vector<WeakEntityPtr> matching_type = getEntitiesOf(entity.entity);
+    std::vector<WeakEntityPtr> matching_coords = getEntitiesAt(entity.coords);
     std::vector<WeakEntityPtr> matching_both;
-    std::copy_if(matching_type.begin(), matching_type.end(), std::back_inserter(matching_both), 
+    std::copy_if(matching_coords.begin(), matching_coords.end(), std::back_inserter(matching_both), 
                  [&entity](const WeakEntityPtr& weak_e_ptr) {
                     if (auto e_ptr = weak_e_ptr.lock()) {
-                        return e_ptr->coords == entity.coords;
+                        return e_ptr->entity == entity.entity;
                     }
                     return false;
                  });
     return matching_both;
 }
 
-// template <typename E, unsigned int Dim, typename Index>
-// DiscretePtrWorld2<E, Dim, Index>::~DiscretePtrWorld2() 
-// {
-//     for (EntityPtr& e_ptr : entities)
-//     {
-//         // This would maybe delete the entity wherever it may exist, which is
-//         // not necessarily what we want? We've designed it such that entities
-//         // exist outside of worlds due to the pointers.
-//         e_ptr.reset();
-//     }
-//     entities.clear();
-// }
+///
+///
+///
 
 template <typename E, unsigned int Dim, typename Index = unsigned long>
 class Engine
