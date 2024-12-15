@@ -38,6 +38,8 @@ public:
     void spawn(const WeakEntityPtr& weak_e_ptr);
     void despawn(const WeakEntityPtr& to_despawn);
     Cell getCell(Coords coords);
+
+    bool isInBounds(Coords coords) { return world.isInBounds(coords); }
 };
 
 template <typename E, unsigned int Dim, typename Index>
@@ -152,6 +154,10 @@ void DiscreteUnorderedEngine<E, Dim, Index>::moveEntityBy(const Index id, Coords
 template <typename E, unsigned int Dim, typename Index>
 void DiscreteUnorderedEngine<E, Dim, Index>::moveEntityTo(const Index id, Coords new_coords) 
 {
+    if (!world.isInBounds(new_coords))
+    {
+        throw std::invalid_argument("Coordinates out of bounds");
+    }
     EntityPtr to_move = entities[id];
     world.despawn(to_move);
     to_move->_entity.coords = new_coords;
