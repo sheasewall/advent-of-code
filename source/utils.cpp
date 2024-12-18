@@ -6,6 +6,7 @@
 #include "narray.cpp"
 #include "grid.cpp"
 #include "recursive.cpp"
+#include "setgrid.cpp"
 
 using namespace utils;
 

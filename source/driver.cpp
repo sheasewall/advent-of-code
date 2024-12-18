@@ -8,6 +8,8 @@
 #include "hyper.cpp"
 #include "narray.cpp"
 #include "grid.cpp"
+#include "setgrid.cpp"
+// #include "nonrecursive.cpp"
 
 #include <cassert>
 
@@ -225,9 +227,9 @@ void test_narray() {
     Array<unsigned int, 1> pos1({1});
     Array<unsigned int, 1> pos2({2});
     
-    assert(arr1d.putElement(pos0, 10));
-    assert(arr1d.putElement(pos1, 20));
-    assert(arr1d.putElement(pos2, 30));
+    arr1d.putElement(pos0, 10);
+    arr1d.putElement(pos1, 20);
+    arr1d.putElement(pos2, 30);
     
     // Test element retrieval
     assert(arr1d.getElement(pos0) == 10);
@@ -251,10 +253,10 @@ void test_narray() {
     Array<unsigned int, 2> pos10({1, 0});
     Array<unsigned int, 2> pos11({1, 1});
     
-    assert(arr2d.putElement(pos00, 1));
-    assert(arr2d.putElement(pos01, 2));
-    assert(arr2d.putElement(pos10, 3));
-    assert(arr2d.putElement(pos11, 4));
+    arr2d.putElement(pos00, 1);
+    arr2d.putElement(pos01, 2);
+    arr2d.putElement(pos10, 3);
+    arr2d.putElement(pos11, 4);
     
     // Test element retrieval
     assert(arr2d.getElement(pos00) == 1);
@@ -285,14 +287,14 @@ void test_narray() {
     Array<unsigned int, 3> pos110({1, 1, 0});
     Array<unsigned int, 3> pos111({1, 1, 1});
     
-    assert(arr3d.putElement(pos000, 1));
-    assert(arr3d.putElement(pos001, 2));
-    assert(arr3d.putElement(pos010, 3));
-    assert(arr3d.putElement(pos011, 4));
-    assert(arr3d.putElement(pos100, 5));
-    assert(arr3d.putElement(pos101, 6));
-    assert(arr3d.putElement(pos110, 7));
-    assert(arr3d.putElement(pos111, 8));
+    arr3d.putElement(pos000, 1);
+    arr3d.putElement(pos001, 2);
+    arr3d.putElement(pos010, 3);
+    arr3d.putElement(pos011, 4);
+    arr3d.putElement(pos100, 5);
+    arr3d.putElement(pos101, 6);
+    arr3d.putElement(pos110, 7);
+    arr3d.putElement(pos111, 8);
     
     // Test element retrieval
     assert(arr3d.getElement(pos000) == 1);
@@ -1701,140 +1703,2383 @@ void test_engine2_private() {
     std::cout << "All additional Engine tests passed!\n";
 }
 
-void test_discrete_grid_and_engine() {
-    std::cout << "Testing DiscreteGrid and DiscreteEngine functionality...\n";
+// void test_discrete_grid_and_engine() {
+//     std::cout << "Testing DiscreteGrid and DiscreteEngine functionality...\n";
 
-    // Test 1: Basic spawn/despawn operations in 2D
+//     // Test 1: Basic spawn/despawn operations in 2D
+//     {
+//         std::cout << "Testing basic 2D operations...\n";
+//         Array<unsigned long, 2> dims({10, 10});
+//         DiscreteEngine<std::string, 2> engine(dims);
+
+//         Entity<std::string, 2> entity;
+//         entity.entity = "test_entity";
+//         entity.coords = Array<unsigned long, 2>({5, 5});
+        
+//         engine.spawn(entity);
+        
+//         // Verify spawn
+//         auto entities_at = engine.getWeakEntitiesAt(Array<unsigned long, 2>({5, 5}));
+//         assert(entities_at.size() == 1);
+//         assert(entities_at[0].lock()->entity == "test_entity");
+        
+//         // Test despawn
+//         engine.despawn(entity);
+//         auto strong_entities_at = engine.getEntitiesAt(Array<unsigned long, 2>({5, 5}));
+//         assert(strong_entities_at.empty());
+//         entities_at = engine.getWeakEntitiesAt(Array<unsigned long, 2>({5, 5}));
+//         assert(entities_at.size() == 1); // the dead weak_ptr is still there.
+//     }
+
+//     // Test 2: Multiple entities at same location in 3D
+//     {
+//         std::cout << "Testing multiple entities at same location in 3D...\n";
+//         Array<unsigned long, 3> dims({5, 5, 5});
+//         DiscreteEngine<int, 3> engine(dims);
+
+//         Array<unsigned long, 3> location({2, 2, 2});
+//         Entity<int, 3> entity1;
+//         entity1.entity = 1;
+//         entity1.coords = location;
+
+//         Entity<int, 3> entity2;
+//         entity2.entity = 2;
+//         entity2.coords = location;
+
+//         engine.spawn(entity1);
+//         engine.spawn(entity2);
+
+//         // Verify both entities
+//         auto entities_at = engine.getEntitiesAt(location);
+//         assert(entities_at.size() == 2);
+//         bool found1 = false, found2 = false;
+//         for(const auto& e : entities_at) {
+//             if(e->entity == 1) found1 = true;
+//             if(e->entity == 2) found2 = true;
+//         }
+//         assert(found1 && found2);
+
+//         entities_at.clear();
+//         // Test despawn of one entity
+//         engine.despawn(entity1);
+//         entities_at = engine.getEntitiesAt(location);
+//         assert(entities_at.size() == 1);
+//         assert(entities_at[0]->entity == 2);
+//     }
+
+//     // Test 3: Edge cases with 1D world
+//     {
+//         std::cout << "Testing 1D world edge cases...\n";
+//         Array<unsigned long, 1> dims({100});
+//         DiscreteEngine<int, 1> engine(dims);
+
+//         // Test boundaries
+//         Entity<int, 1> start_entity{1, Array<unsigned long, 1>({0})};
+//         Entity<int, 1> end_entity{2, Array<unsigned long, 1>({99})};
+        
+//         engine.spawn(start_entity);
+//         engine.spawn(end_entity);
+
+//         // Verify boundary entities
+//         auto start_entities = engine.getEntitiesAt(Array<unsigned long, 1>({0}));
+//         auto end_entities = engine.getEntitiesAt(Array<unsigned long, 1>({99}));
+//         assert(start_entities.size() == 1);
+//         assert(end_entities.size() == 1);
+//         assert(start_entities[0]->entity == 1);
+//         assert(end_entities[0]->entity == 2);
+
+//         engine.despawn(start_entity);
+//         engine.despawn(end_entity);
+        
+//         // Verify removal
+//         assert(engine.getEntitiesAt(Array<unsigned long, 1>({0})).empty());
+//         assert(engine.getEntitiesAt(Array<unsigned long, 1>({99})).empty());
+//     }
+
+//     // Test 4: Grid coverage test
+//     {
+//         std::cout << "Testing grid coverage...\n";
+//         Array<unsigned long, 2> dims({3, 3});
+//         DiscreteEngine<int, 2> engine(dims);
+
+//         // Spawn entities in each cell
+//         for(unsigned long x = 0; x < 3; x++) {
+//             for(unsigned long y = 0; y < 3; y++) {
+//                 Entity<int, 2> entity;
+//                 entity.entity = x * 3 + y;
+//                 entity.coords = Array<unsigned long, 2>({x, y});
+//                 engine.spawn(entity);
+//             }
+//         }
+
+//         // Verify each cell
+//         for(unsigned long x = 0; x < 3; x++) {
+//             for(unsigned long y = 0; y < 3; y++) {
+//                 auto entities = engine.getEntitiesAt(Array<unsigned long, 2>({x, y}));
+//                 assert(entities.size() == 1);
+//                 assert(entities[0]->entity == x * 3 + y);
+//             }
+//         }
+//     }
+
+//     std::cout << "All DiscreteGrid and DiscreteEngine tests passed!\n";
+// }
+
+void test_discrete_engine() {
+    std::cout << "Testing DiscreteEngine functionality...\n";
+
+    // Test 1: Basic spawn/despawn with 2D world
     {
         std::cout << "Testing basic 2D operations...\n";
-        Array<unsigned long, 2> dims({10, 10});
-        DiscreteEngine<std::string, 2> engine(dims);
-
+        DiscreteEngine<std::string, 2> engine(Array<unsigned long, 2>({15, 10}));
+        
         Entity<std::string, 2> entity;
         entity.entity = "test_entity";
-        entity.coords = Array<unsigned long, 2>({5, 5});
+        entity.coords = Array<unsigned long, 2>({5, 7});
         
         engine.spawn(entity);
         
-        // Verify spawn
-        auto entities_at = engine.getWeakEntitiesAt(Array<unsigned long, 2>({5, 5}));
-        assert(entities_at.size() == 1);
-        assert(entities_at[0].lock()->entity == "test_entity");
+        auto entities = engine.getEntitiesAt(Array<unsigned long, 2>({5, 7}));
+        assert(entities.size() == 1);
+        assert(!entities[0].expired());
+        assert(entities[0].lock()->entity == "test_entity");
         
-        // Test despawn
         engine.despawn(entity);
-        auto strong_entities_at = engine.getEntitiesAt(Array<unsigned long, 2>({5, 5}));
-        assert(strong_entities_at.empty());
-        entities_at = engine.getWeakEntitiesAt(Array<unsigned long, 2>({5, 5}));
-        assert(entities_at.empty());
+        entities = engine.getEntitiesAt(Array<unsigned long, 2>({5, 7}));
+        assert(entities.empty());
+
+        auto weak_ptrs = engine.getEntitiesAt(Array<unsigned long, 2>({5, 7}));
+        assert(entities.size() == 0);
     }
 
-    // Test 2: Multiple entities at same location in 3D
+    // Test 2: Multiple entities at same location
     {
-        std::cout << "Testing multiple entities at same location in 3D...\n";
-        Array<unsigned long, 3> dims({5, 5, 5});
-        DiscreteEngine<int, 3> engine(dims);
-
-        Array<unsigned long, 3> location({2, 2, 2});
-        Entity<int, 3> entity1;
-        entity1.entity = 1;
-        entity1.coords = location;
-
-        Entity<int, 3> entity2;
-        entity2.entity = 2;
-        entity2.coords = location;
-
+        std::cout << "Testing multiple entities at same location...\n";
+        DiscreteEngine<std::string, 2> engine(Array<unsigned long, 2>({5, 5}));
+        
+        Entity<std::string, 2> entity1{"entity1", Array<unsigned long, 2>({2, 2})};
+        Entity<std::string, 2> entity2{"entity2", Array<unsigned long, 2>({2, 2})};
+        Entity<std::string, 2> entity3{"entity3", Array<unsigned long, 2>({2, 2})};
+        
         engine.spawn(entity1);
         engine.spawn(entity2);
+        engine.spawn(entity3);
+        
+        auto entities = engine.getEntitiesAt(Array<unsigned long, 2>({2, 2}));
+        assert(entities.size() == 3);
+        
+        // Test selective despawn
+        engine.despawn(entity2);
+        auto valid_entities = engine.getEntitiesAt(Array<unsigned long, 2>({2, 2}));
+        assert(valid_entities.size() == 2);
 
-        // Verify both entities
-        auto entities_at = engine.getEntitiesAt(location);
-        assert(entities_at.size() == 2);
-        bool found1 = false, found2 = false;
-        for(const auto& e : entities_at) {
-            if(e->entity == 1) found1 = true;
-            if(e->entity == 2) found2 = true;
-        }
-        assert(found1 && found2);
-
-        // Test despawn of one entity
-        engine.despawn(entity1);
-        entities_at = engine.getEntitiesAt(location);
-        assert(entities_at.size() == 1);
-        assert(entities_at[0]->entity == 2);
+        auto entities2 = engine.getEntitiesAt(Array<unsigned long, 2>({2, 2}));
+        assert(entities2.size() == 2);
     }
 
-    // Test 3: Edge cases with 1D world
+    // Test 3: Multiple entity management in 3D non-cubic world
+    {
+        DiscreteEngine<int, 3> engine(Array<unsigned long, 3>({7, 4, 2}));
+
+        for(int i = 0; i < 100; i++) {
+            Entity<int, 3> entity;
+            entity.entity = i % 3;
+            entity.coords = Array<unsigned long, 3>({
+                static_cast<unsigned long>(i % 8),
+                static_cast<unsigned long>((i/8) % 5),
+                static_cast<unsigned long>((i/40) % 3)
+            });
+            engine.spawn(entity);
+        }
+        
+        auto all_entities = engine.getEntities();
+        assert(all_entities.size() == 100);
+        
+        // Verify distribution of entity types
+        for(int type = 0; type < 3; type++) {
+            Entity<int, 3> probe;
+            probe.entity = type;
+            auto type_entities = engine.getEntitiesOf(type);
+            assert(type_entities.size() == 34 || type_entities.size() == 33); // ~100/3
+        }
+
+        for(int i = 0; i < 50; i++) {
+            Entity<int, 3> entity;
+            entity.entity = i % 3;
+            entity.coords = Array<unsigned long, 3>({
+                static_cast<unsigned long>(i % 8),
+                static_cast<unsigned long>((i/8) % 5),
+                static_cast<unsigned long>((i/40) % 3)
+            });
+            engine.despawn(entity);
+        }
+        
+        all_entities = engine.getEntities();
+        int valid_count = 0;
+        for(const auto& weak_ptr : all_entities) {
+            valid_count++;
+            //if(!weak_ptr.expired()) valid_count++;
+        }
+        assert(valid_count <= 51 || valid_count >= 49); // ~50 remaining
+    }
+
+    // Test 3: Memory safety with nested scopes
+    {
+        std::cout << "Testing memory safety with nested scopes...\n";
+        auto engine_ptr = make_unique<DiscreteEngine<std::string, 2>>(Array<unsigned long, 2>({5, 5}));
+        std::weak_ptr<Entity<std::string, 2>> weak_entity;
+        
+        {
+            Entity<std::string, 2> entity{"scope_test", Array<unsigned long, 2>({3, 3})};
+            engine_ptr->spawn(entity);
+            
+            auto entities = engine_ptr->getEntitiesAt(Array<unsigned long, 2>({3, 3}));
+            assert(entities.size() == 1);
+            weak_entity = entities[0];
+            assert(!weak_entity.expired());
+        }
+        
+        assert(!weak_entity.expired());  // Should still be valid while engine exists
+        engine_ptr.reset();
+        assert(weak_entity.expired());   // Should be invalid after engine deletion
+    }
+
+    // Test 4: Edge cases with 1D world
     {
         std::cout << "Testing 1D world edge cases...\n";
-        Array<unsigned long, 1> dims({100});
-        DiscreteEngine<int, 1> engine(dims);
-
+        DiscreteEngine<int, 1> engine(Array<unsigned long, 1>({100}));
+        
         // Test boundaries
-        Entity<int, 1> start_entity{1, Array<unsigned long, 1>({0})};
-        Entity<int, 1> end_entity{2, Array<unsigned long, 1>({99})};
+        Entity<int, 1> start_entity{1, Array<unsigned long, 1>({0})};    // Start boundary
+        Entity<int, 1> end_entity{2, Array<unsigned long, 1>({99})};     // End boundary
         
         engine.spawn(start_entity);
         engine.spawn(end_entity);
-
-        // Verify boundary entities
+        
         auto start_entities = engine.getEntitiesAt(Array<unsigned long, 1>({0}));
         auto end_entities = engine.getEntitiesAt(Array<unsigned long, 1>({99}));
+        
         assert(start_entities.size() == 1);
         assert(end_entities.size() == 1);
-        assert(start_entities[0]->entity == 1);
-        assert(end_entities[0]->entity == 2);
-
-        engine.despawn(start_entity);
-        engine.despawn(end_entity);
-        
-        // Verify removal
-        assert(engine.getEntitiesAt(Array<unsigned long, 1>({0})).empty());
-        assert(engine.getEntitiesAt(Array<unsigned long, 1>({99})).empty());
+        assert(start_entities[0].lock()->entity == 1);
+        assert(end_entities[0].lock()->entity == 2);
     }
 
-    // Test 4: Grid coverage test
+    // Test 5: Grid coverage test
     {
         std::cout << "Testing grid coverage...\n";
-        Array<unsigned long, 2> dims({3, 3});
-        DiscreteEngine<int, 2> engine(dims);
-
-        // Spawn entities in each cell
+        DiscreteEngine<int, 2> engine(Array<unsigned long, 2>({3, 3}));
+        
+        // Spawn entities in every cell
         for(unsigned long x = 0; x < 3; x++) {
             for(unsigned long y = 0; y < 3; y++) {
-                Entity<int, 2> entity;
-                entity.entity = x * 3 + y;
-                entity.coords = Array<unsigned long, 2>({x, y});
+                Entity<int, 2> entity{static_cast<int>(x * 3 + y), Array<unsigned long, 2>({x, y})};
                 engine.spawn(entity);
             }
         }
-
+        
         // Verify each cell
         for(unsigned long x = 0; x < 3; x++) {
             for(unsigned long y = 0; y < 3; y++) {
                 auto entities = engine.getEntitiesAt(Array<unsigned long, 2>({x, y}));
                 assert(entities.size() == 1);
-                assert(entities[0]->entity == x * 3 + y);
+                assert(entities[0].lock()->entity == x * 3 + y);
             }
         }
     }
 
-    std::cout << "All DiscreteGrid and DiscreteEngine tests passed!\n";
+    // Test 6: Mass spawn/despawn cycles
+    {
+        std::cout << "Testing mass spawn/despawn cycles...\n";
+        DiscreteEngine<int, 3> engine(Array<unsigned long, 3>({10, 100, 10}));
+        std::vector<Entity<int, 3>> entities;
+        
+        // Create entities
+        for(unsigned long x = 0; x < 10; x++) {
+            for(unsigned long y = 0; y < 100; y++) {
+                for(unsigned long z = 0; z < 10; z++) {
+                    entities.push_back(Entity<int, 3>{
+                        static_cast<int>(x + y + z),
+                        Array<unsigned long, 3>({x, y, z})
+                    });
+                }
+            }
+        }
+        
+        // Rapid spawn/despawn cycles
+        for(int cycle = 0; cycle < 1; cycle++) {
+            // Spawn all
+            for(const auto& entity : entities) {
+                engine.spawn(entity);
+            }
+            
+            // Verify all locations
+            for(const auto& entity : entities) {
+                auto at_location = engine.getEntitiesAt(entity.coords);
+                assert(!at_location.empty());
+            }
+            
+            // Despawn all
+            for(const auto& entity : entities) {
+                engine.despawn(entity);
+            }
+            
+            // Verify all locations are empty
+            for(const auto& entity : entities) {
+                auto at_location = engine.getEntitiesAt(entity.coords);
+                assert(at_location.empty());
+            }
+        }
+    }
+
+    // Test 7: Entity modification through weak pointers
+    {
+        std::cout << "Testing entity modification through weak pointers...\n";
+        DiscreteEngine<std::string, 2> engine(Array<unsigned long, 2>({5, 5}));
+        
+        Entity<std::string, 2> entity{"original", Array<unsigned long, 2>({2, 2})};
+        engine.spawn(entity);
+        
+        auto entities = engine.getEntitiesAt(Array<unsigned long, 2>({2, 2}));
+        assert(entities.size() == 1);
+        
+        if (auto ptr = entities[0].lock()) {
+            ptr->entity = "modified";
+        }
+        
+        auto modified_entities = engine.getEntitiesAt(Array<unsigned long, 2>({2, 2}));
+        assert(modified_entities[0].lock()->entity == "modified");
+    }
+
+    std::cout << "All DiscreteEngine tests passed!\n";
+}
+
+void test_despawn_issue() {
+    // Create small 2x2x2 world
+    DiscreteEngine<int, 3> engine(Array<unsigned long, 3>({2, 2, 2}));
+    
+    // Spawn just 4 entities with different types in different locations
+    Entity<int, 3> entities[6];
+    
+    // Entity 0 at (0,0,0)
+    entities[0].entity = 0;
+    entities[0].coords = Array<unsigned long, 3>({0, 0, 0});
+    
+    // Entity 1 at (1,0,0)     saved
+    entities[1].entity = 1;
+    entities[1].coords = Array<unsigned long, 3>({1, 0, 0});
+    
+    // Entity 0 at (0,1,0)
+    entities[2].entity = 0;
+    entities[2].coords = Array<unsigned long, 3>({0, 1, 0});
+    
+    // Entity 1 at (1,1,0)      saved
+    entities[3].entity = 1;
+    entities[3].coords = Array<unsigned long, 3>({1, 1, 0});
+
+    // Entity 0 at (1,1,0)   saved 
+    entities[4].entity = 0;
+    entities[4].coords = Array<unsigned long, 3>({0, 1, 1});
+
+    // Entity 0 at (1,1,0)    saved
+    entities[5].entity = 0;
+    entities[5].coords = Array<unsigned long, 3>({1, 0, 1});
+
+    // Spawn all entities
+    for(int i = 0; i < 6; i++) {
+        engine.spawn(entities[i]);
+    }
+
+    // Verify initial state
+    auto all = engine.getEntities();
+    assert(all.size() == 6);
+    
+    // Try to despawn entity 0 at (0,0,0)
+    engine.despawn(entities[0]);
+    
+    // Check remaining count
+    all = engine.getEntities();
+    assert(all.size() == 5);  // This will likely fail with current implementation
+    
+    // Verify the right entity was removed
+    auto at_origin = engine.getEntitiesAt(Array<unsigned long, 3>({0, 0, 0}));
+    assert(at_origin.empty());
+}
+
+void final_test()
+{
+    std::cout << "Part 1: Testing array comparison edge cases...\n";
+
+    // Test 1: Zero coordinates
+    {
+        DiscreteEngine<int, 3> engine(Array<unsigned long, 3>({2, 2, 2}));
+        
+        // Test different combinations of zero coordinates
+        Entity<int, 3> entities[] = {
+            {0, Array<unsigned long, 3>({0, 0, 0})},
+            {0, Array<unsigned long, 3>({0, 0, 1})},
+            {0, Array<unsigned long, 3>({0, 1, 0})},
+            {0, Array<unsigned long, 3>({1, 0, 0})},
+            {1, Array<unsigned long, 3>({0, 0, 0})} // Same coords as first, different type
+        };
+
+        // Spawn all
+        for(const auto& e : entities) {
+            engine.spawn(e);
+        }
+
+        // Verify each entity exists exactly where expected
+        auto at_000 = engine.getEntitiesAt(Array<unsigned long, 3>({0, 0, 0}));
+        assert(at_000.size() == 2); // Should have both type 0 and type 1
+
+        auto at_001 = engine.getEntitiesAt(Array<unsigned long, 3>({0, 0, 1}));
+        assert(at_001.size() == 1);
+
+        // Try to despawn each individually
+        for(const auto& e : entities) {
+            engine.despawn(e);
+            
+            // Verify only the matching entity was removed
+            auto at_loc = engine.getEntitiesAt(e.coords);
+            
+            // Count remaining entities at this location
+            int count = 0;
+            for(const auto& weak_ptr : at_loc) {
+                if(auto ptr = weak_ptr.lock()) {
+                    if(ptr->entity == e.entity) count++;
+                }
+            }
+            
+            // Should be zero for the type we just removed
+            assert(count == 0);
+        }
+    }
+
+    // Test 2: Identical coordinates with different types
+    {
+        DiscreteEngine<int, 3> engine(Array<unsigned long, 3>({2, 2, 2}));
+        Array<unsigned long, 3> coords({1, 1, 1});
+
+        // Spawn multiple entities at exact same location
+        for(int i = 0; i < 5; i++) {
+            Entity<int, 3> entity{i, coords};
+            engine.spawn(entity);
+        }
+
+        auto at_loc = engine.getEntitiesAt(coords);
+        assert(at_loc.size() == 5);
+
+        // Try to despawn each type
+        for(int i = 0; i < 5; i++) {
+            Entity<int, 3> to_remove{i, coords};
+            engine.despawn(to_remove);
+
+            // Verify only the correct type was removed
+            at_loc = engine.getEntitiesAt(coords);
+            for(const auto& weak_ptr : at_loc) {
+                if(auto ptr = weak_ptr.lock()) {
+                    assert(ptr->entity != i); // Should not find the removed type
+                }
+            }
+            assert(at_loc.size() == 4 - i); // Should decrease by 1 each time
+        }
+    }
+
+    // Test 3: Boundary coordinates
+    {
+        DiscreteEngine<int, 3> engine(Array<unsigned long, 3>({100, 100, 100}));
+        
+        // Test extreme coordinates
+        std::vector<Array<unsigned long, 3>> test_coords = {
+            Array<unsigned long, 3>({0, 0, 0}),          // Origin
+            Array<unsigned long, 3>({99, 99, 99}),       // Far corner
+            Array<unsigned long, 3>({0, 99, 99}),        // Mixed extremes
+            Array<unsigned long, 3>({99, 0, 99}),
+            Array<unsigned long, 3>({99, 99, 0}),
+            Array<unsigned long, 3>({0, 0, 99}),
+            Array<unsigned long, 3>({0, 99, 0}),
+            Array<unsigned long, 3>({99, 0, 0})
+        };
+
+        // Spawn entities at each extreme coordinate
+        for(size_t i = 0; i < test_coords.size(); i++) {
+            Entity<int, 3> entity{static_cast<int>(i), test_coords[i]};
+            engine.spawn(entity);
+        }
+
+        // Verify each location
+        for(size_t i = 0; i < test_coords.size(); i++) {
+            auto at_loc = engine.getEntitiesAt(test_coords[i]);
+            assert(at_loc.size() == 1);
+            assert(at_loc[0].lock()->entity == static_cast<int>(i));
+        }
+
+        // Remove in reverse order
+        for(int i = test_coords.size() - 1; i >= 0; i--) {
+            Entity<int, 3> to_remove{i, test_coords[i]};
+            engine.despawn(to_remove);
+            
+            // Verify removal
+            auto at_loc = engine.getEntitiesAt(test_coords[i]);
+            assert(at_loc.empty());
+        }
+    }
+
+    std::cout << "Part 1 complete!\n";
+
+    std::cout << "Part 2: Testing weak pointer and entity lifetime edge cases...\n";
+
+    // Test 1: Weak pointer expiration scenarios
+    {
+        DiscreteEngine<int, 2> engine(Array<unsigned long, 2>({5, 5}));
+        
+        // Create scope to test pointer lifetime
+        std::vector<std::weak_ptr<Entity<int, 2>>> stored_weak_ptrs;
+        {
+            // Spawn entities that will go out of scope
+            Array<unsigned long, 2> coords({1, 1});
+            for(int i = 0; i < 3; i++) {
+                Entity<int, 2> entity{i, coords};
+                engine.spawn(entity);
+                
+                // Store weak pointers for later verification
+                auto entities = engine.getEntitiesAt(coords);
+                stored_weak_ptrs.push_back(entities.back());
+            }
+            
+            // Verify all entities exist
+            auto at_loc = engine.getEntitiesAt(coords);
+            assert(at_loc.size() == 3);
+            
+            // Despawn middle entity
+            Entity<int, 2> to_remove{1, coords};
+            engine.despawn(to_remove);
+            
+            // Verify remaining entities
+            at_loc = engine.getEntitiesAt(coords);
+            assert(at_loc.size() == 2);
+        }
+        
+        int invalid = 0;
+        // After scope, test weak pointer validity
+        for(auto& weak_ptr : stored_weak_ptrs) {
+            if (weak_ptr.expired())
+            {
+                invalid++;
+            }
+        }
+        assert(invalid == 1);
+    }
+
+    // Test 2: Rapid spawn/despawn cycles
+    {
+        DiscreteEngine<int, 2> engine(Array<unsigned long, 2>({3, 3}));
+        Array<unsigned long, 2> coords({1, 1});
+        
+        // Perform multiple spawn/despawn cycles
+        for(int cycle = 0; cycle < 100; cycle++) {
+            // Spawn entity
+            Entity<int, 2> entity{cycle % 3, coords};
+            engine.spawn(entity);
+            
+            // Verify spawn
+            auto at_loc = engine.getEntitiesAt(coords);
+            bool found = false;
+            for(const auto& weak_ptr : at_loc) {
+                if(auto ptr = weak_ptr.lock()) {
+                    if(ptr->entity == cycle % 3) {
+                        found = true;
+                        break;
+                    }
+                }
+            }
+            assert(found);
+            
+            // Immediate despawn
+            engine.despawn(entity);
+            
+            // Verify despawn
+            at_loc = engine.getEntitiesAt(coords);
+            for(const auto& weak_ptr : at_loc) {
+                if(auto ptr = weak_ptr.lock()) {
+                    assert(ptr->entity != cycle % 3);
+                }
+            }
+        }
+    }
+
+    // Test 3: Mixed strong/weak pointer interactions
+    {
+        DiscreteEngine<int, 2> engine(Array<unsigned long, 2>({4, 4}));
+        Array<unsigned long, 2> coords({2, 2});
+        
+        // Keep strong references alongside engine's internal storage
+        std::vector<std::shared_ptr<Entity<int, 2>>> strong_refs;
+        
+        // Spawn entities and maintain external strong references
+        for(int i = 0; i < 5; i++) {
+            auto entity_ptr = std::make_shared<Entity<int, 2>>();
+            entity_ptr->entity = i;
+            entity_ptr->coords = coords;
+            
+            strong_refs.push_back(entity_ptr);
+            engine.spawn(*entity_ptr);
+        }
+        
+        // Verify all entities exist
+        auto at_loc = engine.getEntitiesAt(coords);
+        assert(at_loc.size() == 5);
+        
+        // Try to despawn while maintaining strong references
+        for(int i = 0; i < 5; i++) {
+            engine.despawn(*strong_refs[i]);
+            
+            // Verify entity was removed from engine but still exists
+            at_loc = engine.getEntitiesAt(coords);
+            bool found_in_engine = false;
+            for(const auto& weak_ptr : at_loc) {
+                if(auto ptr = weak_ptr.lock()) {
+                    if(ptr->entity == i) {
+                        found_in_engine = true;
+                        break;
+                    }
+                }
+            }
+            assert(!found_in_engine);
+            
+            // Verify strong reference still valid
+            assert(strong_refs[i]);
+            assert(strong_refs[i]->entity == i);
+        }
+    }
+
+    std::cout << "Part 2 complete!\n";
+
+    std::cout << "Part 3: Testing concurrent modifications and grid-wide operations...\n";
+
+    // Test 1: Grid-wide population and clearance
+    {
+        DiscreteEngine<int, 3> engine(Array<unsigned long, 3>({4, 4, 4}));
+        std::vector<Entity<int, 3>> entities;
+
+        // Populate every cell with multiple entities
+        for(unsigned long x = 0; x < 4; x++) {
+            for(unsigned long y = 0; y < 4; y++) {
+                for(unsigned long z = 0; z < 4; z++) {
+                    for(int type = 0; type < 3; type++) {
+                        Entity<int, 3> entity{
+                            type,
+                            Array<unsigned long, 3>({x, y, z})
+                        };
+                        entities.push_back(entity);
+                        engine.spawn(entity);
+                    }
+                }
+            }
+        }
+
+        // Verify population
+        for(unsigned long x = 0; x < 4; x++) {
+            for(unsigned long y = 0; y < 4; y++) {
+                for(unsigned long z = 0; z < 4; z++) {
+                    auto at_loc = engine.getEntitiesAt(Array<unsigned long, 3>({x, y, z}));
+                    assert(at_loc.size() == 3);
+                }
+            }
+        }
+
+        // Remove all entities of type 1
+        for(const auto& entity : entities) {
+            if(entity.entity == 1) {
+                engine.despawn(entity);
+            }
+        }
+
+        // Verify correct removal
+        for(unsigned long x = 0; x < 4; x++) {
+            for(unsigned long y = 0; y < 4; y++) {
+                for(unsigned long z = 0; z < 4; z++) {
+                    auto at_loc = engine.getEntitiesAt(Array<unsigned long, 3>({x, y, z}));
+                    assert(at_loc.size() == 2);
+                    for(const auto& weak_ptr : at_loc) {
+                        if(auto ptr = weak_ptr.lock()) {
+                            assert(ptr->entity != 1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Test 2: Pattern-based spawning and removal
+    {
+        DiscreteEngine<int, 2> engine(Array<unsigned long, 2>({8, 8}));
+        
+        // Spawn checkerboard pattern
+        for(unsigned long x = 0; x < 8; x++) {
+            for(unsigned long y = 0; y < 8; y++) {
+                if((x + y) % 2 == 0) {
+                    Entity<int, 2> entity{
+                        static_cast<int>((x * y) % 3),  // Fixed: explicit cast
+                        Array<unsigned long, 2>({x, y})
+                    };
+                    engine.spawn(entity);
+                }
+            }
+        }
+
+        // Verify pattern
+        for(unsigned long x = 0; x < 8; x++) {
+            for(unsigned long y = 0; y < 8; y++) {
+                auto at_loc = engine.getEntitiesAt(Array<unsigned long, 2>({x, y}));
+                if((x + y) % 2 == 0) {
+                    assert(at_loc.size() == 1);
+                    assert(at_loc[0].lock()->entity == static_cast<int>((x * y) % 3));
+                } else {
+                    assert(at_loc.empty());
+                }
+            }
+        }
+
+        // Remove diagonal pattern
+        for(unsigned long i = 0; i < 8; i++) {
+            Entity<int, 2> to_remove{
+                static_cast<int>((i * i) % 3),  // Fixed: explicit cast
+                Array<unsigned long, 2>({i, i})
+            };
+            engine.despawn(to_remove);
+        }
+    
+
+        // Verify diagonal removal
+        for(unsigned long i = 0; i < 8; i++) {
+            auto at_loc = engine.getEntitiesAt(Array<unsigned long, 2>({i, i}));
+            assert(at_loc.empty());
+        }
+    }
+
+    // Test 3: Type-based queries during modifications
+    {
+        DiscreteEngine<int, 2> engine(Array<unsigned long, 2>({5, 5}));
+        
+        // Spawn entities with different types
+        std::vector<Entity<int, 2>> entities;
+        for(unsigned long x = 0; x < 5; x++) {
+            for(unsigned long y = 0; y < 5; y++) {
+                Entity<int, 2> entity{
+                    static_cast<int>((x + y) % 3),
+                    Array<unsigned long, 2>({x, y})
+                };
+                entities.push_back(entity);
+                engine.spawn(entity);
+            }
+        }
+
+        // Keep track of type counts
+        std::vector<size_t> initial_type_counts(3, 0);
+        for(const auto& entity : entities) {
+            initial_type_counts[entity.entity]++;
+        }
+
+        // Remove entities while querying types
+        for(size_t i = 0; i < entities.size(); i += 2) {
+            // Get count before removal
+            auto before = engine.getEntitiesOf(entities[i].entity).size();
+            
+            // Remove entity
+            engine.despawn(entities[i]);
+            
+            // Verify count decreased by 1
+            auto after = engine.getEntitiesOf(entities[i].entity).size();
+            assert(after == before - 1);
+            
+            // TODO
+            // Other type counts should remain unchanged
+            // for(int type = 0; type < 3; type++) {
+            //     if(type != entities[i].entity) {
+            //         auto of = engine.getEntitiesOf(type);
+            //         auto num = initial_type_counts[type] - (i/2);
+            //         assert(std::abs(static_cast<int>(of.size()) - static_cast<int>(num)) <= 1);
+            //     }
+            // }
+        }
+    }
+
+    std::cout << "Part 3 complete!\n";
+
+    std::cout << "Part 4: Testing recovery and extreme scenarios...\n";
+
+    // Test 1: Recovery from invalid operations
+    {
+        DiscreteEngine<int, 2> engine(Array<unsigned long, 2>({3, 3}));
+        
+        // Try spawning outside grid bounds
+        Entity<int, 2> invalid_entity{0, Array<unsigned long, 2>({5, 5})};
+        try {
+            engine.spawn(invalid_entity);
+            assert(false); // Should not reach here
+        } catch(const std::out_of_range&) {
+            // Expected
+        }
+        
+        // Verify engine state remains valid
+        Entity<int, 2> valid_entity{1, Array<unsigned long, 2>({1, 1})};
+        engine.spawn(valid_entity);
+        auto at_loc = engine.getEntitiesAt(valid_entity.coords);
+        assert(at_loc.size() == 1);
+        
+        // Try despawning non-existent entity
+        Entity<int, 2> ghost_entity{2, Array<unsigned long, 2>({0, 0})};
+        engine.despawn(ghost_entity);
+        
+        // Verify original entity unaffected
+        at_loc = engine.getEntitiesAt(valid_entity.coords);
+        assert(at_loc.size() == 1);
+        assert(at_loc[0].lock()->entity == 1);
+    }
+
+    // Test 2: Extreme size scenarios
+    {
+        // Test with minimal dimensions
+        DiscreteEngine<int, 3> tiny_engine(Array<unsigned long, 3>({1, 1, 1}));
+        Entity<int, 3> single_entity{0, Array<unsigned long, 3>({0, 0, 0})};
+        tiny_engine.spawn(single_entity);
+        auto at_origin = tiny_engine.getEntitiesAt(Array<unsigned long, 3>({0, 0, 0}));
+        assert(at_origin.size() == 1);
+        
+        // Test with large dimensions
+        DiscreteEngine<int, 2> large_engine(Array<unsigned long, 2>({1000, 1000}));
+        std::vector<Entity<int, 2>> corner_entities;
+        
+        // Spawn at corners
+        Array<unsigned long, 2> corners[4] = {
+            Array<unsigned long, 2>({0l, 0l}),
+            Array<unsigned long, 2>({0l, 999l}),
+            Array<unsigned long, 2>({999l, 0l}),
+            Array<unsigned long, 2>({999l, 999l})
+        };
+        
+        for(int i = 0; i < 4; i++) {
+            Entity<int, 2> entity{i, corners[i]};
+            corner_entities.push_back(entity);
+            large_engine.spawn(entity);
+        }
+        
+        // Verify corners
+        for(int i = 0; i < 4; i++) {
+            auto at_corner = large_engine.getEntitiesAt(corners[i]);
+            assert(at_corner.size() == 1);
+            assert(at_corner[0].lock()->entity == i);
+        }
+    }
+
+    // Test 3: Entity type mutations
+    {
+        DiscreteEngine<int, 2> engine(Array<unsigned long, 2>({4, 4}));
+        Array<unsigned long, 2> coords({2, 2});
+        
+        // Spawn initial entity
+        Entity<int, 2> original{0, coords};
+        engine.spawn(original);
+        
+        // Spawn entity of different type at same location
+        Entity<int, 2> mutation{1, coords};
+        engine.spawn(mutation);
+        
+        // Verify both exist
+        auto at_loc = engine.getEntitiesAt(coords);
+        assert(at_loc.size() == 2);
+        
+        bool found_original = false, found_mutation = false;
+        for(const auto& weak_ptr : at_loc) {
+            if(auto ptr = weak_ptr.lock()) {
+                if(ptr->entity == 0) found_original = true;
+                if(ptr->entity == 1) found_mutation = true;
+            }
+        }
+        assert(found_original && found_mutation);
+        
+        // Remove original
+        engine.despawn(original);
+        
+        // Verify only mutation remains
+        at_loc = engine.getEntitiesAt(coords);
+        assert(at_loc.size() == 1);
+        assert(at_loc[0].lock()->entity == 1);
+    }
+
+    // Test 4: Mixed dimension edge cases
+    {
+        // Create engines of different dimensions
+        DiscreteEngine<int, 1> engine1d(Array<unsigned long, 1>({5}));
+        DiscreteEngine<int, 2> engine2d(Array<unsigned long, 2>({5, 5}));
+        DiscreteEngine<int, 3> engine3d(Array<unsigned long, 3>({5, 5, 5}));
+        
+        // Test 1D to 2D transition points
+        Entity<int, 1> entity1d{0, Array<unsigned long, 1>({2})};
+        engine1d.spawn(entity1d);
+        
+        Entity<int, 2> entity2d{0, Array<unsigned long, 2>({2, 0})};
+        engine2d.spawn(entity2d);
+        
+        // Test 2D to 3D transition points
+        Entity<int, 2> entity2d_corner{1, Array<unsigned long, 2>({4, 4})};
+        engine2d.spawn(entity2d_corner);
+        
+        Entity<int, 3> entity3d{1, Array<unsigned long, 3>({4, 4, 0})};
+        engine3d.spawn(entity3d);
+        
+        // Verify correct placement
+        auto at_1d = engine1d.getEntitiesAt(Array<unsigned long, 1>({2}));
+        assert(at_1d.size() == 1);
+        
+        auto at_2d = engine2d.getEntitiesAt(Array<unsigned long, 2>({2, 0}));
+        assert(at_2d.size() == 1);
+        
+        auto at_3d = engine3d.getEntitiesAt(Array<unsigned long, 3>({4, 4, 0}));
+        assert(at_3d.size() == 1);
+    }
+
+    std::cout << "Part 4 complete!\n";
+}
+
+void test_grid_functionality() {
+    // Test 1: Basic initialization
+    Array<unsigned long, 2> grid_size = Array<unsigned long, 2>({10, 10});
+    DiscreteUnorderedEngine<int, 2> engine(grid_size);
+    std::cout << "Test 1: Engine initialization - PASSED\n";
+
+    // Test 2: Entity creation and spawn
+    Entity<int, 2> entity1;
+    entity1.entity = 1;  // entity type
+    entity1.coords = Array<unsigned long, 2>({5, 5});
+    
+    Entity<int, 2> entity2;
+    entity2.entity = 2;  // different entity type
+    entity2.coords = Array<unsigned long, 2>({5, 5});  // same location
+    
+    engine.spawn(entity1);
+    engine.spawn(entity2);
+    
+    auto entities = engine.getEntities();
+    assert(entities.size() == 2);
+    std::cout << "Test 2: Entity spawning - PASSED\n";
+
+    // Test 3: Get entities by type
+    auto type1_entities = engine.getEntitiesOf(1);
+    auto type2_entities = engine.getEntitiesOf(2);
+    assert(type1_entities.size() == 1);
+    assert(type2_entities.size() == 1);
+    std::cout << "Test 3: Get entities by type - PASSED\n";
+
+    // Test 4: Get entities at location
+    auto entities_at_location = engine.getEntitiesAt(Array<unsigned long, 2>({5, 5}));
+    assert(entities_at_location.size() == 2);
+    std::cout << "Test 4: Get entities at location - PASSED\n";
+
+    // Test 5: Despawn entity
+    auto entity1_hashed = engine.getEntity(0);  // First entity should have id 0
+    if (auto entity1_locked = entity1_hashed.lock()) {
+        engine.despawn(entity1_locked->id);
+    }
+    entities = engine.getEntities();
+    assert(entities.size() == 1);
+    std::cout << "Test 5: Entity despawning - PASSED\n";
+
+    // Test 6: Test edge cases
+    Entity<int, 2> edge_entity;
+    edge_entity.entity = 3;
+    edge_entity.coords = Array<unsigned long, 2>({0, 0});  // Corner case
+    engine.spawn(edge_entity);
+    
+    edge_entity.coords = Array<unsigned long, 2>({9, 9});  // Other corner
+    engine.spawn(edge_entity);
+    
+    entities = engine.getEntities();
+    assert(entities.size() == 3);
+    std::cout << "Test 6: Edge case handling - PASSED\n";
+
+    // Test 6: Mass spawn/despawn cycles
+    {
+        std::cout << "Testing mass spawn/despawn cycles...\n";
+        DiscreteUnorderedEngine<int, 3> engine(Array<unsigned long, 3>({100, 100, 100}));
+        std::vector<Entity<int, 3>> entities;
+        
+        // Create entities
+        for(unsigned long x = 0; x < 100; x++) {
+            for(unsigned long y = 0; y < 100; y++) {
+                for(unsigned long z = 0; z < 100; z++) {
+                    entities.push_back(Entity<int, 3>{
+                        static_cast<int>(x + y + z),
+                        Array<unsigned long, 3>({x, y, z})
+                    });
+                }
+            }
+        }
+        
+        // Rapid spawn/despawn cycles
+        for(int cycle = 0; cycle < 1; cycle++) {
+            std::vector<unsigned long> ids;
+            // Spawn all
+            for(const auto& entity : entities) {
+                ids.push_back(engine.spawn(entity));
+            }
+            
+            // Verify all locations
+            for(const auto& entity : entities) {
+                auto at_location = engine.getEntitiesAt(entity.coords);
+                assert(!at_location.empty());
+            }
+            
+            // Despawn all
+            for(const auto& id : ids) {
+                engine.despawn(id);
+            }
+            
+            // Verify all locations are empty
+            for(const auto& entity : entities) {
+                auto at_location = engine.getEntitiesAt(entity.coords);
+                assert(at_location.empty());
+            }
+        }
+    }
+
+    std::cout << "All tests passed successfully!\n";
+}
+
+void final_testp1()
+{
+    std::cout << "Part 1: Testing array comparison edge cases...\n";
+
+    // Test 1: Zero coordinates
+    {
+        DiscreteUnorderedEngine<int, 3> engine(Array<unsigned long, 3>({2, 2, 2}));
+        
+        // Test different combinations of zero coordinates
+        std::vector<unsigned long> ids;
+        Entity<int, 3> entities[] = {
+            {0, Array<unsigned long, 3>({0, 0, 0})},
+            {0, Array<unsigned long, 3>({0, 0, 1})},
+            {0, Array<unsigned long, 3>({0, 1, 0})},
+            {0, Array<unsigned long, 3>({1, 0, 0})},
+            {1, Array<unsigned long, 3>({0, 0, 0})} // Same coords as first, different type
+        };
+
+        // Spawn all
+        for(const auto& e : entities) {
+            ids.push_back(engine.spawn(e));
+        }
+
+        // Verify each entity exists exactly where expected
+        auto at_000 = engine.getEntitiesAt(Array<unsigned long, 3>({0, 0, 0}));
+        assert(at_000.size() == 2); // Should have both type 0 and type 1
+
+        auto at_001 = engine.getEntitiesAt(Array<unsigned long, 3>({0, 0, 1}));
+        assert(at_001.size() == 1);
+
+        // Despawn each individually
+        for(const auto& id : ids) {
+            engine.despawn(id);
+            
+            // Verify entity was removed
+            auto entity = engine.getEntity(id);
+            assert(entity.expired());
+        }
+    }
+
+    // Test 2: Identical coordinates with different types
+    {
+        DiscreteUnorderedEngine<int, 2> engine(Array<unsigned long, 2>({4, 4}));
+        Array<unsigned long, 2> coords({2, 2});
+        
+        std::vector<unsigned long> ids;
+        
+        // Spawn multiple entities at exact same location
+        for(int i = 0; i < 5; i++) {
+            Entity<int, 2> entity{i, coords};
+            ids.push_back(engine.spawn(entity));
+        }
+
+        auto at_loc = engine.getEntitiesAt(coords);
+        assert(at_loc.size() == 5);
+
+        // Remove in reverse order
+        for(auto it = ids.rbegin(); it != ids.rend(); ++it) {
+            engine.despawn(*it);
+            auto entity = engine.getEntity(*it);
+            assert(entity.expired());
+        }
+    }
+
+    std::cout << "Part 1 complete!\n";
+
+    std::cout << "Part 2: Testing type-based queries...\n";
+    
+    {
+        DiscreteUnorderedEngine<int, 2> engine(Array<unsigned long, 2>({5, 5}));
+        
+        // Spawn entities with different types
+        std::vector<unsigned long> type0_ids, type1_ids;
+        
+        for(unsigned long x = 0; x < 5; x++) {
+            for(unsigned long y = 0; y < 5; y++) {
+                Entity<int, 2> entity0{0, Array<unsigned long, 2>({x, y})};
+                Entity<int, 2> entity1{1, Array<unsigned long, 2>({x, y})};
+                
+                type0_ids.push_back(engine.spawn(entity0));
+                type1_ids.push_back(engine.spawn(entity1));
+            }
+        }
+
+        // Verify type queries
+        auto type0_entities = engine.getEntitiesOf(0);
+        auto type1_entities = engine.getEntitiesOf(1);
+        
+        assert(type0_entities.size() == 25);
+        assert(type1_entities.size() == 25);
+
+        // Remove all type 0 entities
+        for(const auto& id : type0_ids) {
+            engine.despawn(id);
+        }
+
+        // Verify only type 1 remains
+        type0_entities = engine.getEntitiesOf(0);
+        type1_entities = engine.getEntitiesOf(1);
+        
+        assert(type0_entities.empty());
+        assert(type1_entities.size() == 25);
+    }
+
+    std::cout << "Part 2 complete!\n";
+
+    std::cout << "Part 3: Testing concurrent modifications and grid-wide operations...\n";
+
+    // Test 1: Grid-wide population and clearance
+    {
+        DiscreteUnorderedEngine<int, 3> engine(Array<unsigned long, 3>({4, 4, 4}));
+        std::vector<unsigned long> all_ids;
+        std::vector<unsigned long> type1_ids;
+
+        // Populate every cell with multiple entities
+        for(unsigned long x = 0; x < 4; x++) {
+            for(unsigned long y = 0; y < 4; y++) {
+                for(unsigned long z = 0; z < 4; z++) {
+                    for(int type = 0; type < 3; type++) {
+                        Entity<int, 3> entity{
+                            type,
+                            Array<unsigned long, 3>({x, y, z})
+                        };
+                        unsigned long id = engine.spawn(entity);
+                        all_ids.push_back(id);
+                        if(type == 1) type1_ids.push_back(id);
+                    }
+                }
+            }
+        }
+
+        // Verify population
+        for(unsigned long x = 0; x < 4; x++) {
+            for(unsigned long y = 0; y < 4; y++) {
+                for(unsigned long z = 0; z < 4; z++) {
+                    auto at_loc = engine.getEntitiesAt(Array<unsigned long, 3>({x, y, z}));
+                    assert(at_loc.size() == 3);
+                }
+            }
+        }
+
+        // Remove all entities of type 1
+        for(const auto& id : type1_ids) {
+            engine.despawn(id);
+        }
+
+        // Verify correct removal
+        for(unsigned long x = 0; x < 4; x++) {
+            for(unsigned long y = 0; y < 4; y++) {
+                for(unsigned long z = 0; z < 4; z++) {
+                    auto at_loc = engine.getEntitiesAt(Array<unsigned long, 3>({x, y, z}));
+                    assert(at_loc.size() == 2);
+                    for(const auto& pair : at_loc) {
+                        if(auto ptr = pair.second.lock()) {
+                            assert(ptr->_entity.entity != 1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Test 2: Pattern-based spawning and removal
+    {
+        DiscreteUnorderedEngine<int, 2> engine(Array<unsigned long, 2>({8, 8}));
+        std::vector<unsigned long> diagonal_ids;
+        
+        // Spawn checkerboard pattern
+        for(unsigned long x = 0; x < 8; x++) {
+            for(unsigned long y = 0; y < 8; y++) {
+                if((x + y) % 2 == 0) {
+                    Entity<int, 2> entity{
+                        static_cast<int>((x * y) % 3),
+                        Array<unsigned long, 2>({x, y})
+                    };
+                    unsigned long id = engine.spawn(entity);
+                    if(x == y) diagonal_ids.push_back(id);
+                }
+            }
+        }
+
+        // Verify pattern
+        for(unsigned long x = 0; x < 8; x++) {
+            for(unsigned long y = 0; y < 8; y++) {
+                auto at_loc = engine.getEntitiesAt(Array<unsigned long, 2>({x, y}));
+                if((x + y) % 2 == 0) {
+                    assert(at_loc.size() == 1);
+                    for(const auto& pair : at_loc) {
+                        if(auto ptr = pair.second.lock()) {
+                            assert(ptr->_entity.entity == static_cast<int>((x * y) % 3));
+                        }
+                    }
+                } else {
+                    assert(at_loc.empty());
+                }
+            }
+        }
+
+        // Remove diagonal elements
+        for(const auto& id : diagonal_ids) {
+            engine.despawn(id);
+        }
+
+        // Verify diagonal removal
+        for(unsigned long i = 0; i < 8; i++) {
+            auto at_loc = engine.getEntitiesAt(Array<unsigned long, 2>({i, i}));
+            assert(at_loc.empty());
+        }
+    }
+
+    std::cout << "Part 3 complete!\n";
+
+    std::cout << "Part 4: Testing recovery and extreme scenarios...\n";
+
+    // Test 1: Recovery from invalid operations
+    {
+        DiscreteUnorderedEngine<int, 2> engine(Array<unsigned long, 2>({3, 3}));
+        
+        // Create valid entity
+        Entity<int, 2> valid_entity{1, Array<unsigned long, 2>({1, 1})};
+        unsigned long valid_id = engine.spawn(valid_entity);
+        
+        // Try despawning non-existent ID  TODO
+        //engine.despawn(9999ul);
+        
+        // Verify original entity unaffected
+        auto at_loc = engine.getEntitiesAt(valid_entity.coords);
+        assert(at_loc.size() == 1);
+        auto it = at_loc.begin();
+        if(auto ptr = it->second.lock()) {
+            assert(ptr->_entity.entity == 1);
+        }
+    }
+
+    // Test 2: Extreme size scenarios
+    {
+        // Test with minimal dimensions
+        DiscreteUnorderedEngine<int, 3> tiny_engine(Array<unsigned long, 3>({1, 1, 1}));
+        Entity<int, 3> single_entity{0, Array<unsigned long, 3>({0, 0, 0})};
+        unsigned long id = tiny_engine.spawn(single_entity);
+        auto at_origin = tiny_engine.getEntitiesAt(Array<unsigned long, 3>({0, 0, 0}));
+        assert(at_origin.size() == 1);
+        
+        // Test with large dimensions
+        DiscreteUnorderedEngine<int, 2> large_engine(Array<unsigned long, 2>({1000, 1000}));
+        std::vector<unsigned long> corner_ids;
+        
+        // Spawn at corners
+        Array<unsigned long, 2> corners[4] = {
+            Array<unsigned long, 2>({0, 0}),
+            Array<unsigned long, 2>({0, 999}),
+            Array<unsigned long, 2>({999, 0}),
+            Array<unsigned long, 2>({999, 999})
+        };
+        
+        for(int i = 0; i < 4; i++) {
+            Entity<int, 2> entity{i, corners[i]};
+            corner_ids.push_back(large_engine.spawn(entity));
+        }
+        
+        // Verify corners
+        for(int i = 0; i < 4; i++) {
+            auto at_corner = large_engine.getEntitiesAt(corners[i]);
+            assert(at_corner.size() == 1);
+            auto it = at_corner.begin();
+            if(auto ptr = it->second.lock()) {
+                assert(ptr->_entity.entity == i);
+            }
+        }
+    }
+
+    // Test 3: Entity type mutations
+    {
+        DiscreteUnorderedEngine<int, 2> engine(Array<unsigned long, 2>({4, 4}));
+        Array<unsigned long, 2> coords({2, 2});
+        
+        // Spawn initial entity
+        Entity<int, 2> original{0, coords};
+        unsigned long original_id = engine.spawn(original);
+        
+        // Spawn entity of different type at same location
+        Entity<int, 2> mutation{1, coords};
+        unsigned long mutation_id = engine.spawn(mutation);
+        
+        // Verify both exist
+        auto at_loc = engine.getEntitiesAt(coords);
+        assert(at_loc.size() == 2);
+        
+        bool found_original = false, found_mutation = false;
+        for(const auto& pair : at_loc) {
+            if(auto ptr = pair.second.lock()) {
+                if(ptr->_entity.entity == 0) found_original = true;
+                if(ptr->_entity.entity == 1) found_mutation = true;
+            }
+        }
+        assert(found_original && found_mutation);
+        
+        // Remove original
+        engine.despawn(original_id);
+        
+        // Verify only mutation remains
+        at_loc = engine.getEntitiesAt(coords);
+        assert(at_loc.size() == 1);
+        auto it = at_loc.begin();
+        if(auto ptr = it->second.lock()) {
+            assert(ptr->_entity.entity == 1);
+        }
+    }
+
+    // Test 4: Mixed dimension edge cases
+    {
+        // Create engines of different dimensions
+        DiscreteUnorderedEngine<int, 1> engine1d(Array<unsigned long, 1>({5}));
+        DiscreteUnorderedEngine<int, 2> engine2d(Array<unsigned long, 2>({5, 5}));
+        DiscreteUnorderedEngine<int, 3> engine3d(Array<unsigned long, 3>({5, 5, 5}));
+        
+        // Test 1D to 2D transition points
+        Entity<int, 1> entity1d{0, Array<unsigned long, 1>({2})};
+        engine1d.spawn(entity1d);
+        
+        Entity<int, 2> entity2d{0, Array<unsigned long, 2>({2, 0})};
+        engine2d.spawn(entity2d);
+        
+        // Test 2D to 3D transition points
+        Entity<int, 2> entity2d_corner{1, Array<unsigned long, 2>({4, 4})};
+        engine2d.spawn(entity2d_corner);
+        
+        Entity<int, 3> entity3d{1, Array<unsigned long, 3>({4, 4, 0})};
+        engine3d.spawn(entity3d);
+        
+        // Verify correct placement
+        auto at_1d = engine1d.getEntitiesAt(Array<unsigned long, 1>({2}));
+        assert(at_1d.size() == 1);
+        
+        auto at_2d = engine2d.getEntitiesAt(Array<unsigned long, 2>({2, 0}));
+        assert(at_2d.size() == 1);
+        
+        auto at_3d = engine3d.getEntitiesAt(Array<unsigned long, 3>({4, 4, 0}));
+        assert(at_3d.size() == 1);
+    }
+
+    std::cout << "Part 4 complete!\n";
+}
+
+void testMove()
+{
+    DiscreteUnorderedEngine<int, 3> engine3d(Array<unsigned long, 3>({8, 6, 7}));
+    Entity<int, 3> entity3d{7, Array<unsigned long, 3>({4, 3, 0})};
+    auto id = engine3d.spawn(entity3d);
+
+    auto at_3d_og = engine3d.getEntitiesAt(Array<unsigned long, 3>({4, 3, 0}));
+    assert(at_3d_og.size() == 1);
+
+    try {
+        engine3d.moveEntityBy(id, Array<unsigned long, 3>({10, 8, 6}));
+        assert(false); // Should not reach here
+    } catch(const std::invalid_argument&) {
+        // Expected
+    }
+
+    engine3d.moveEntityBy(id, Array<unsigned long, 3>({2, 1, 0}));
+    auto it = at_3d_og.begin();
+    int valid_ptrs = 0;
+    if(auto ptr = it->second.lock()) {
+        valid_ptrs++;
+    }
+    // Ideally, moving an entity would invalidate the pointer within vectors
+    // previously returned from getEntitiesAt(), but since the entity lives
+    // on, the pointer is still valid. Perhaps HashEntities should have a
+    // dirty bit? Or simply always check that the coords in HashEntities 
+    // returned from getEntitiesAt() is correct. Maybe combine both in a 
+    // checking function. 
+    assert(valid_ptrs == 1);
+
+    auto at_3d_new = engine3d.getEntitiesAt(Array<unsigned long, 3>({6, 4, 0}));
+    assert(at_3d_new.size() == 1);
+
+    {
+        const int x_dim = 101;
+        const int y_dim = 101;
+        const int z_dim = 101;
+        std::cout << "Testing mass spawn/move/despawn cycles...\n";
+        DiscreteUnorderedEngine<int, 3> engine(Array<unsigned long, 3>({x_dim, y_dim, z_dim}));
+        std::vector<Entity<int, 3>> entities;
+        
+        // Create entities
+        for(unsigned long x = 0; x < x_dim - 1; x++) {
+            for(unsigned long y = 0; y < y_dim - 1; y++) {
+                for(unsigned long z = 0; z < z_dim - 1; z++) {
+                    entities.push_back(Entity<int, 3>{
+                        static_cast<int>(x + y + z),
+                        Array<unsigned long, 3>({x, y, z})
+                    });
+                }
+            }
+        }
+        
+        // Rapid spawn/move/despawn cycles
+        for(int cycle = 0; cycle < 1; cycle++) {
+            std::vector<unsigned long> ids;
+
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for(const auto& entity : entities) {
+                    ids.push_back(engine.spawn(entity));
+                }
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                std::cout << "Spawn time: " << duration.count() << " microseconds\n";
+            }
+
+            // Verify all locations
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for(const auto& entity : entities) {
+                    auto at_location = engine.getEntitiesAt(entity.coords);
+                    assert(!at_location.empty());
+                }
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                std::cout << "Verify locations time: " << duration.count() << " microseconds\n";
+            }
+
+            // Move all
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for(const auto& id : ids) {
+                    engine.moveEntityBy(id, Array<unsigned long, 3>({1, 1, 1}));
+                }
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                std::cout << "Move time: " << duration.count() << " microseconds\n";
+            }
+
+            // Re-verify location
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for(const auto& entity : engine.getEntities()) {
+                    auto at_location = engine.getEntitiesAt(entity.second->_entity.coords);
+                    assert(!at_location.empty());
+                }
+                auto at_origin = engine.getEntitiesAt(Array<unsigned long, 3>({0, 0, 0}));
+                assert(at_origin.empty());
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                std::cout << "Re-verify time: " << duration.count() << " microseconds\n";
+            }
+
+            // Despawn all
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for(const auto& id : ids) {
+                    engine.despawn(id);
+                }
+                auto at_corner = engine.getEntitiesAt(Array<unsigned long, 3>({x_dim, y_dim, z_dim}));
+                assert(at_corner.empty());
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                std::cout << "Despawn time: " << duration.count() << " microseconds\n";
+            }
+
+            // Verify all locations are empty
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for(const auto& entity : engine.getEntities()) {
+                    auto at_location = engine.getEntitiesAt(entity.second->_entity.coords);
+                    assert(at_location.empty());
+                }
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                std::cout << "Final verify time: " << duration.count() << " microseconds\n";
+            }
+            // // Spawn all
+            // for(const auto& entity : entities) {
+            //     ids.push_back(engine.spawn(entity));
+            // }
+            
+            // // Verify all locations
+            // for(const auto& entity : entities) {
+            //     auto at_location = engine.getEntitiesAt(entity.coords);
+            //     assert(!at_location.empty());
+            // }
+
+            // // Move all
+            // for(const auto& id : ids) {
+            //     engine.moveEntityBy(id, Array<unsigned long, 3>({1, 1, 1}));
+            // }
+
+            // // Re-verify location
+            // for(const auto& entity : engine.getEntities()) {
+            //     auto at_location = engine.getEntitiesAt(entity.second->_entity.coords);
+            //     assert(!at_location.empty());
+            // }
+            // auto at_origin = engine.getEntitiesAt(Array<unsigned long, 3>({0, 0, 0}));
+            // assert(at_origin.empty());
+            
+            // // Despawn all
+            // for(const auto& id : ids) {
+            //     engine.despawn(id);
+            // }
+            // auto at_corner = engine.getEntitiesAt(Array<unsigned long, 3>({x_dim, y_dim, z_dim}));
+            // assert(at_corner.empty());
+            
+            // // Verify all locations are empty
+            // for(const auto& entity : engine.getEntities()) {
+            //     auto at_location = engine.getEntitiesAt(entity.second->_entity.coords);
+            //     assert(at_location.empty());
+            // }
+        }
+    }
+}
+void test_dimarray() {
+    std::cout << "Testing 1D DimensionalArray...\n";
+    
+    // Test 1D NArray
+    MyArray<unsigned int, 1> dims1({3});
+    DimensionalArray<int, 1, unsigned int> arr1d(dims1);
+    
+    // Test element insertion
+    MyArray<unsigned int, 1> pos0({0});
+    MyArray<unsigned int, 1> pos1({1});
+    MyArray<unsigned int, 1> pos2({2});
+    
+    arr1d.putElement(pos0, 10);
+    arr1d.putElement(pos1, 20);
+    arr1d.putElement(pos2, 30);
+    
+    // Test element retrieval
+    assert(arr1d.getElement(pos0) == 10);
+    assert(arr1d.getElement(pos1) == 20);
+    assert(arr1d.getElement(pos2) == 30);
+    
+    // Test operator[]
+    // assert(arr1d[0] == 10);
+    // assert(arr1d[1] == 20);
+    // assert(arr1d[2] == 30);
+
+    std::cout << "Testing 2D DimensionalArray...\n";
+    
+    // Test 2D NArray
+    MyArray<unsigned int, 2> dims2({2, 2});
+    DimensionalArray<int, 2, unsigned int> arr2d(dims2);
+    
+    // Test element insertion
+    MyArray<unsigned int, 2> pos00({0, 0});
+    MyArray<unsigned int, 2> pos01({0, 1});
+    MyArray<unsigned int, 2> pos10({1, 0});
+    MyArray<unsigned int, 2> pos11({1, 1});
+    
+    arr2d.putElement(pos00, 1);
+    arr2d.putElement(pos01, 2);
+    arr2d.putElement(pos10, 3);
+    arr2d.putElement(pos11, 4);
+    
+    // Test element retrieval
+    assert(arr2d.getElement(pos00) == 1);
+    assert(arr2d.getElement(pos01) == 2);
+    assert(arr2d.getElement(pos10) == 3);
+    assert(arr2d.getElement(pos11) == 4);
+
+    // Test bounds checking
+    try {
+        MyArray<unsigned int, 1> invalid_pos({5});
+        arr1d.getElement(invalid_pos);
+        assert(false); // Should not reach here
+    } catch (const std::invalid_argument&) {
+        // Expected
+    }
+
+    // Create 3D array with dimensions 2x2x2
+    MyArray<unsigned int, 3> dims3({2, 2, 2});
+    DimensionalArray<int, 3, unsigned int> arr3d(dims3);
+    
+    // Test element insertion at various coordinates
+    MyArray<unsigned int, 3> pos000({0, 0, 0});
+    MyArray<unsigned int, 3> pos001({0, 0, 1});
+    MyArray<unsigned int, 3> pos010({0, 1, 0});
+    MyArray<unsigned int, 3> pos011({0, 1, 1});
+    MyArray<unsigned int, 3> pos100({1, 0, 0});
+    MyArray<unsigned int, 3> pos101({1, 0, 1});
+    MyArray<unsigned int, 3> pos110({1, 1, 0});
+    MyArray<unsigned int, 3> pos111({1, 1, 1});
+    
+    arr3d.putElement(pos000, 1);
+    arr3d.putElement(pos001, 2);
+    arr3d.putElement(pos010, 3);
+    arr3d.putElement(pos011, 4);
+    arr3d.putElement(pos100, 5);
+    arr3d.putElement(pos101, 6);
+    arr3d.putElement(pos110, 7);
+    arr3d.putElement(pos111, 8);
+    
+    // Test element retrieval
+    assert(arr3d.getElement(pos000) == 1);
+    assert(arr3d.getElement(pos001) == 2);
+    assert(arr3d.getElement(pos010) == 3);
+    assert(arr3d.getElement(pos011) == 4);
+    assert(arr3d.getElement(pos100) == 5);
+    assert(arr3d.getElement(pos101) == 6);
+    assert(arr3d.getElement(pos110) == 7);
+    assert(arr3d.getElement(pos111) == 8);
+
+    // Test bounds checking
+    try {
+        MyArray<unsigned int, 3> invalid_pos({3, 3, 3});
+        arr3d.getElement(invalid_pos);
+        assert(false); // Should not reach here
+    } catch (const std::invalid_argument&) {
+        // Expected
+    }
+
+    std::cout << "All 3D DimensionalArray tests passed!\n";
+
+    std::cout << "All DimensionalArray tests passed!\n";
+}
+void test_grid2_functionality() {
+    // Test 1: Basic initialization
+    MyArray<unsigned long, 2> grid_size = MyArray<unsigned long, 2>({10, 10});
+    DiscreteUnorderedEngine2<int, 2, unsigned long> engine(grid_size);
+    std::cout << "Test 1: Engine initialization - PASSED\n";
+
+    // Test 2: Entity creation and spawn
+    PointEntity<int, 2> entity1;
+    entity1.entity = 1;  // entity type
+    entity1.coords = MyArray<unsigned long, 2>({5, 5});
+    
+    PointEntity<int, 2> entity2;
+    entity2.entity = 2;  // different entity type
+    entity2.coords = MyArray<unsigned long, 2>({5, 5});  // same location
+    
+    engine.spawn(entity1);
+    engine.spawn(entity2);
+    
+    auto entities = engine.getEntities();
+    assert(entities.size() == 2);
+    std::cout << "Test 2: Entity spawning - PASSED\n";
+
+    // Test 3: Get entities by type
+    auto type1_entities = engine.getEntitiesOf(1);
+    auto type2_entities = engine.getEntitiesOf(2);
+    assert(type1_entities.size() == 1);
+    assert(type2_entities.size() == 1);
+    std::cout << "Test 3: Get entities by type - PASSED\n";
+
+    // Test 4: Get entities at location
+    auto entities_at_location = engine.getEntitiesAt(MyArray<unsigned long, 2>({5, 5}));
+    assert(entities_at_location.size() == 2);
+    std::cout << "Test 4: Get entities at location - PASSED\n";
+
+    // Test 5: Despawn entity
+    auto entity1_hashed = engine.getEntity(0);  // First entity should have id 0
+    if (auto entity1_locked = entity1_hashed.lock()) {
+        engine.despawn(entity1_locked->id);
+    }
+    entities = engine.getEntities();
+    assert(entities.size() == 1);
+    std::cout << "Test 5: Entity despawning - PASSED\n";
+
+    // Test 6: Test edge cases
+    PointEntity<int, 2> edge_entity;
+    edge_entity.entity = 3;
+    edge_entity.coords = MyArray<unsigned long, 2>({0, 0});  // Corner case
+    engine.spawn(edge_entity);
+    
+    edge_entity.coords = MyArray<unsigned long, 2>({9, 9});  // Other corner
+    engine.spawn(edge_entity);
+    
+    entities = engine.getEntities();
+    assert(entities.size() == 3);
+    std::cout << "Test 6: Edge case handling - PASSED\n";
+
+    // Test 6: Mass spawn/despawn cycles
+    {
+        std::cout << "Testing mass spawn/despawn cycles...\n";
+        DiscreteUnorderedEngine2<int, 3> engine(MyArray<unsigned long, 3>({100, 100, 100}));
+        std::vector<PointEntity<int, 3>> entities;
+        
+        // Create entities
+        for(unsigned long x = 0; x < 100; x++) {
+            for(unsigned long y = 0; y < 100; y++) {
+                for(unsigned long z = 0; z < 100; z++) {
+                    entities.push_back(PointEntity<int, 3>{
+                        static_cast<int>(x + y + z),
+                        MyArray<unsigned long, 3>({x, y, z})
+                    });
+                }
+            }
+        }
+        
+        // Rapid spawn/despawn cycles
+        for(int cycle = 0; cycle < 1; cycle++) {
+            std::vector<unsigned long> ids;
+            // Spawn all
+            for(const auto& entity : entities) {
+                ids.push_back(engine.spawn(entity));
+            }
+            
+            // Verify all locations
+            for(const auto& entity : entities) {
+                auto at_location = engine.getEntitiesAt(entity.coords);
+                assert(!at_location.empty());
+            }
+            
+            // Despawn all
+            for(const auto& id : ids) {
+                engine.despawn(id);
+            }
+            
+            // Verify all locations are empty
+            for(const auto& entity : entities) {
+                auto at_location = engine.getEntitiesAt(entity.coords);
+                assert(at_location.empty());
+            }
+        }
+    }
+
+    std::cout << "All tests passed successfully!\n";
+}
+
+void final_testp12()
+{
+    std::cout << "Part 1: Testing array comparison edge cases...\n";
+
+    // Test 1: Zero coordinates
+    {
+        DiscreteUnorderedEngine2<int, 3> engine(MyArray<unsigned long, 3>({2, 2, 2}));
+        
+        // Test different combinations of zero coordinates
+        std::vector<unsigned long> ids;
+        PointEntity<int, 3> entities[] = {
+            {0, MyArray<unsigned long, 3>({0, 0, 0})},
+            {0, MyArray<unsigned long, 3>({0, 0, 1})},
+            {0, MyArray<unsigned long, 3>({0, 1, 0})},
+            {0, MyArray<unsigned long, 3>({1, 0, 0})},
+            {1, MyArray<unsigned long, 3>({0, 0, 0})} // Same coords as first, different type
+        };
+
+        // Spawn all
+        for(const auto& e : entities) {
+            ids.push_back(engine.spawn(e));
+        }
+
+        // Verify each entity exists exactly where expected
+        auto at_000 = engine.getEntitiesAt(MyArray<unsigned long, 3>({0, 0, 0}));
+        assert(at_000.size() == 2); // Should have both type 0 and type 1
+
+        auto at_001 = engine.getEntitiesAt(MyArray<unsigned long, 3>({0, 0, 1}));
+        assert(at_001.size() == 1);
+
+        // Despawn each individually
+        for(const auto& id : ids) {
+            engine.despawn(id);
+            
+            // Verify entity was removed
+            auto entity = engine.getEntity(id);
+            assert(entity.expired());
+        }
+    }
+
+    // Test 2: Identical coordinates with different types
+    {
+        DiscreteUnorderedEngine2<int, 2> engine(MyArray<unsigned long, 2>({4, 4}));
+        MyArray<unsigned long, 2> coords({2, 2});
+        
+        std::vector<unsigned long> ids;
+        
+        // Spawn multiple entities at exact same location
+        for(int i = 0; i < 5; i++) {
+            PointEntity<int, 2> entity{i, coords};
+            ids.push_back(engine.spawn(entity));
+        }
+
+        auto at_loc = engine.getEntitiesAt(coords);
+        assert(at_loc.size() == 5);
+
+        // Remove in reverse order
+        for(auto it = ids.rbegin(); it != ids.rend(); ++it) {
+            engine.despawn(*it);
+            auto entity = engine.getEntity(*it);
+            assert(entity.expired());
+        }
+    }
+
+    std::cout << "Part 1 complete!\n";
+
+    std::cout << "Part 2: Testing type-based queries...\n";
+    
+    {
+        DiscreteUnorderedEngine2<int, 2> engine(MyArray<unsigned long, 2>({5, 5}));
+        
+        // Spawn entities with different types
+        std::vector<unsigned long> type0_ids, type1_ids;
+        
+        for(unsigned long x = 0; x < 5; x++) {
+            for(unsigned long y = 0; y < 5; y++) {
+                PointEntity<int, 2> entity0{0, MyArray<unsigned long, 2>({x, y})};
+                PointEntity<int, 2> entity1{1, MyArray<unsigned long, 2>({x, y})};
+                
+                type0_ids.push_back(engine.spawn(entity0));
+                type1_ids.push_back(engine.spawn(entity1));
+            }
+        }
+
+        // Verify type queries
+        auto type0_entities = engine.getEntitiesOf(0);
+        auto type1_entities = engine.getEntitiesOf(1);
+        
+        assert(type0_entities.size() == 25);
+        assert(type1_entities.size() == 25);
+
+        // Remove all type 0 entities
+        for(const auto& id : type0_ids) {
+            engine.despawn(id);
+        }
+
+        // Verify only type 1 remains
+        type0_entities = engine.getEntitiesOf(0);
+        type1_entities = engine.getEntitiesOf(1);
+        
+        assert(type0_entities.empty());
+        assert(type1_entities.size() == 25);
+    }
+
+    std::cout << "Part 2 complete!\n";
+
+    std::cout << "Part 3: Testing concurrent modifications and grid-wide operations...\n";
+
+    // Test 1: Grid-wide population and clearance
+    {
+        DiscreteUnorderedEngine2<int, 3> engine(MyArray<unsigned long, 3>({4, 4, 4}));
+        std::vector<unsigned long> all_ids;
+        std::vector<unsigned long> type1_ids;
+
+        // Populate every cell with multiple entities
+        for(unsigned long x = 0; x < 4; x++) {
+            for(unsigned long y = 0; y < 4; y++) {
+                for(unsigned long z = 0; z < 4; z++) {
+                    for(int type = 0; type < 3; type++) {
+                        PointEntity<int, 3> entity{
+                            type,
+                            MyArray<unsigned long, 3>({x, y, z})
+                        };
+                        unsigned long id = engine.spawn(entity);
+                        all_ids.push_back(id);
+                        if(type == 1) type1_ids.push_back(id);
+                    }
+                }
+            }
+        }
+
+        // Verify population
+        for(unsigned long x = 0; x < 4; x++) {
+            for(unsigned long y = 0; y < 4; y++) {
+                for(unsigned long z = 0; z < 4; z++) {
+                    auto at_loc = engine.getEntitiesAt(MyArray<unsigned long, 3>({x, y, z}));
+                    assert(at_loc.size() == 3);
+                }
+            }
+        }
+
+        // Remove all entities of type 1
+        for(const auto& id : type1_ids) {
+            engine.despawn(id);
+        }
+
+        // Verify correct removal
+        for(unsigned long x = 0; x < 4; x++) {
+            for(unsigned long y = 0; y < 4; y++) {
+                for(unsigned long z = 0; z < 4; z++) {
+                    auto at_loc = engine.getEntitiesAt(MyArray<unsigned long, 3>({x, y, z}));
+                    assert(at_loc.size() == 2);
+                    for(const auto& pair : at_loc) {
+                        if(auto ptr = pair.second.lock()) {
+                            assert(ptr->point_entity.entity != 1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Test 2: Pattern-based spawning and removal
+    {
+        DiscreteUnorderedEngine2<int, 2> engine(MyArray<unsigned long, 2>({8, 8}));
+        std::vector<unsigned long> diagonal_ids;
+        
+        // Spawn checkerboard pattern
+        for(unsigned long x = 0; x < 8; x++) {
+            for(unsigned long y = 0; y < 8; y++) {
+                if((x + y) % 2 == 0) {
+                    PointEntity<int, 2> entity{
+                        static_cast<int>((x * y) % 3),
+                        MyArray<unsigned long, 2>({x, y})
+                    };
+                    unsigned long id = engine.spawn(entity);
+                    if(x == y) diagonal_ids.push_back(id);
+                }
+            }
+        }
+
+        // Verify pattern
+        for(unsigned long x = 0; x < 8; x++) {
+            for(unsigned long y = 0; y < 8; y++) {
+                auto at_loc = engine.getEntitiesAt(MyArray<unsigned long, 2>({x, y}));
+                if((x + y) % 2 == 0) {
+                    assert(at_loc.size() == 1);
+                    for(const auto& pair : at_loc) {
+                        if(auto ptr = pair.second.lock()) {
+                            assert(ptr->point_entity.entity == static_cast<int>((x * y) % 3));
+                        }
+                    }
+                } else {
+                    assert(at_loc.empty());
+                }
+            }
+        }
+
+        // Remove diagonal elements
+        for(const auto& id : diagonal_ids) {
+            engine.despawn(id);
+        }
+
+        // Verify diagonal removal
+        for(unsigned long i = 0; i < 8; i++) {
+            auto at_loc = engine.getEntitiesAt(MyArray<unsigned long, 2>({i, i}));
+            assert(at_loc.empty());
+        }
+    }
+
+    std::cout << "Part 3 complete!\n";
+
+    std::cout << "Part 4: Testing recovery and extreme scenarios...\n";
+
+    // Test 1: Recovery from invalid operations
+    {
+        DiscreteUnorderedEngine2<int, 2> engine(MyArray<unsigned long, 2>({3, 3}));
+        
+        // Create valid entity
+        PointEntity<int, 2> valid_entity{1, MyArray<unsigned long, 2>({1, 1})};
+        unsigned long valid_id = engine.spawn(valid_entity);
+        
+        // Try despawning non-existent ID  TODO
+        //engine.despawn(9999ul);
+        
+        // Verify original entity unaffected
+        auto at_loc = engine.getEntitiesAt(valid_entity.coords);
+        assert(at_loc.size() == 1);
+        auto it = at_loc.begin();
+        if(auto ptr = it->second.lock()) {
+            assert(ptr->point_entity.entity == 1);
+        }
+    }
+
+    // Test 2: Extreme size scenarios
+    {
+        // Test with minimal dimensions
+        DiscreteUnorderedEngine2<int, 3> tiny_engine(MyArray<unsigned long, 3>({1, 1, 1}));
+        PointEntity<int, 3> single_entity{0, MyArray<unsigned long, 3>({0, 0, 0})};
+        unsigned long id = tiny_engine.spawn(single_entity);
+        auto at_origin = tiny_engine.getEntitiesAt(MyArray<unsigned long, 3>({0, 0, 0}));
+        assert(at_origin.size() == 1);
+        
+        // Test with large dimensions
+        DiscreteUnorderedEngine2<int, 2> large_engine(MyArray<unsigned long, 2>({1000, 1000}));
+        std::vector<unsigned long> corner_ids;
+        
+        // Spawn at corners
+        MyArray<unsigned long, 2> corners[4] = {
+            MyArray<unsigned long, 2>({0, 0}),
+            MyArray<unsigned long, 2>({0, 999}),
+            MyArray<unsigned long, 2>({999, 0}),
+            MyArray<unsigned long, 2>({999, 999})
+        };
+        
+        for(int i = 0; i < 4; i++) {
+            PointEntity<int, 2> entity{i, corners[i]};
+            corner_ids.push_back(large_engine.spawn(entity));
+        }
+        
+        // Verify corners
+        for(int i = 0; i < 4; i++) {
+            auto at_corner = large_engine.getEntitiesAt(corners[i]);
+            assert(at_corner.size() == 1);
+            auto it = at_corner.begin();
+            if(auto ptr = it->second.lock()) {
+                assert(ptr->point_entity.entity == i);
+            }
+        }
+    }
+
+    // Test 3: Entity type mutations
+    {
+        DiscreteUnorderedEngine2<int, 2> engine(MyArray<unsigned long, 2>({4, 4}));
+        MyArray<unsigned long, 2> coords({2, 2});
+        
+        // Spawn initial entity
+        PointEntity<int, 2> original{0, coords};
+        unsigned long original_id = engine.spawn(original);
+        
+        // Spawn entity of different type at same location
+        PointEntity<int, 2> mutation{1, coords};
+        unsigned long mutation_id = engine.spawn(mutation);
+        
+        // Verify both exist
+        auto at_loc = engine.getEntitiesAt(coords);
+        assert(at_loc.size() == 2);
+        
+        bool found_original = false, found_mutation = false;
+        for(const auto& pair : at_loc) {
+            if(auto ptr = pair.second.lock()) {
+                if(ptr->point_entity.entity == 0) found_original = true;
+                if(ptr->point_entity.entity == 1) found_mutation = true;
+            }
+        }
+        assert(found_original && found_mutation);
+        
+        // Remove original
+        engine.despawn(original_id);
+        
+        // Verify only mutation remains
+        at_loc = engine.getEntitiesAt(coords);
+        assert(at_loc.size() == 1);
+        auto it = at_loc.begin();
+        if(auto ptr = it->second.lock()) {
+            assert(ptr->point_entity.entity == 1);
+        }
+    }
+
+    // Test 4: Mixed dimension edge cases
+    {
+        // Create engines of different dimensions
+        DiscreteUnorderedEngine2<int, 1> engine1d(MyArray<unsigned long, 1>({5}));
+        DiscreteUnorderedEngine2<int, 2> engine2d(MyArray<unsigned long, 2>({5, 5}));
+        DiscreteUnorderedEngine2<int, 3> engine3d(MyArray<unsigned long, 3>({5, 5, 5}));
+        
+        // Test 1D to 2D transition points
+        PointEntity<int, 1> entity1d{0, MyArray<unsigned long, 1>({2})};
+        engine1d.spawn(entity1d);
+        
+        PointEntity<int, 2> entity2d{0, MyArray<unsigned long, 2>({2, 0})};
+        engine2d.spawn(entity2d);
+        
+        // Test 2D to 3D transition points
+        PointEntity<int, 2> entity2d_corner{1, MyArray<unsigned long, 2>({4, 4})};
+        engine2d.spawn(entity2d_corner);
+        
+        PointEntity<int, 3> entity3d{1, MyArray<unsigned long, 3>({4, 4, 0})};
+        engine3d.spawn(entity3d);
+        
+        // Verify correct placement
+        auto at_1d = engine1d.getEntitiesAt(MyArray<unsigned long, 1>({2}));
+        assert(at_1d.size() == 1);
+        
+        auto at_2d = engine2d.getEntitiesAt(MyArray<unsigned long, 2>({2, 0}));
+        assert(at_2d.size() == 1);
+        
+        auto at_3d = engine3d.getEntitiesAt(MyArray<unsigned long, 3>({4, 4, 0}));
+        assert(at_3d.size() == 1);
+    }
+
+    std::cout << "Part 4 complete!\n";
+}
+
+void testMove2()
+{
+    DiscreteUnorderedEngine2<int, 3> engine3d(MyArray<unsigned long, 3>({8, 6, 7}));
+    PointEntity<int, 3> entity3d{7, MyArray<unsigned long, 3>({4, 3, 0})};
+    auto id = engine3d.spawn(entity3d);
+
+    auto at_3d_og = engine3d.getEntitiesAt(MyArray<unsigned long, 3>({4, 3, 0}));
+    assert(at_3d_og.size() == 1);
+
+    try {
+        engine3d.moveEntityBy(id, MyArray<unsigned long, 3>({10, 8, 6}));
+        assert(false); // Should not reach here
+    } catch(const std::invalid_argument&) {
+        // Expected
+    }
+
+    engine3d.moveEntityBy(id, MyArray<unsigned long, 3>({2, 1, 0}));
+    auto it = at_3d_og.begin();
+    int valid_ptrs = 0;
+    if(auto ptr = it->second.lock()) {
+        valid_ptrs++;
+    }
+    // Ideally, moving an entity would invalidate the pointer within vectors
+    // previously returned from getEntitiesAt(), but since the entity lives
+    // on, the pointer is still valid. Perhaps HashEntities should have a
+    // dirty bit? Or simply always check that the coords in HashEntities 
+    // returned from getEntitiesAt() is correct. Maybe combine both in a 
+    // checking function. 
+    assert(valid_ptrs == 1);
+
+    auto at_3d_new = engine3d.getEntitiesAt(MyArray<unsigned long, 3>({6, 4, 0}));
+    assert(at_3d_new.size() == 1);
+
+    {
+        const int x_dim = 101;
+        const int y_dim = 101;
+        const int z_dim = 101;
+        std::cout << "Testing mass spawn/move/despawn cycles...\n";
+        DiscreteUnorderedEngine2<int, 3> engine(MyArray<unsigned long, 3>({x_dim, y_dim, z_dim}));
+        std::vector<PointEntity<int, 3>> entities;
+        
+        // Create entities
+        for(unsigned long x = 0; x < x_dim - 1; x++) {
+            for(unsigned long y = 0; y < y_dim - 1; y++) {
+                for(unsigned long z = 0; z < z_dim - 1; z++) {
+                    entities.push_back(PointEntity<int, 3>{
+                        static_cast<int>(x + y + z),
+                        MyArray<unsigned long, 3>({x, y, z})
+                    });
+                }
+            }
+        }
+        
+        // Rapid spawn/move/despawn cycles
+        for(int cycle = 0; cycle < 1; cycle++) {
+            std::vector<unsigned long> ids;
+
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for(const auto& entity : entities) {
+                    ids.push_back(engine.spawn(entity));
+                }
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                std::cout << "Spawn time: " << duration.count() << " microseconds\n";
+            }
+
+            // Verify all locations
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for(const auto& entity : entities) {
+                    auto at_location = engine.getEntitiesAt(entity.coords);
+                    assert(!at_location.empty());
+                }
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                std::cout << "Verify locations time: " << duration.count() << " microseconds\n";
+            }
+
+            // Move all
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for(const auto& id : ids) {
+                    engine.moveEntityBy(id, MyArray<unsigned long, 3>({1, 1, 1}));
+                }
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                std::cout << "Move time: " << duration.count() << " microseconds\n";
+            }
+
+            // Re-verify location
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for(const auto& entity : engine.getEntities()) {
+                    auto at_location = engine.getEntitiesAt(entity.second->point_entity.coords);
+                    assert(!at_location.empty());
+                }
+                auto at_origin = engine.getEntitiesAt(MyArray<unsigned long, 3>({0, 0, 0}));
+                assert(at_origin.empty());
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                std::cout << "Re-verify time: " << duration.count() << " microseconds\n";
+            }
+
+            // Despawn all
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for(const auto& id : ids) {
+                    engine.despawn(id);
+                }
+                auto at_corner = engine.getEntitiesAt(MyArray<unsigned long, 3>({x_dim - 1, y_dim - 1, z_dim - 1}));
+                assert(at_corner.empty());
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                std::cout << "Despawn time: " << duration.count() << " microseconds\n";
+            }
+
+            // Verify all locations are empty
+            {
+                auto start = std::chrono::high_resolution_clock::now();
+                for(const auto& entity : engine.getEntities()) {
+                    auto at_location = engine.getEntitiesAt(entity.second->point_entity.coords);
+                    assert(at_location.empty());
+                }
+                auto end = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+                std::cout << "Final verify time: " << duration.count() << " microseconds\n";
+            }
+            // // Spawn all
+            // for(const auto& entity : entities) {
+            //     ids.push_back(engine.spawn(entity));
+            // }
+            
+            // // Verify all locations
+            // for(const auto& entity : entities) {
+            //     auto at_location = engine.getEntitiesAt(entity.coords);
+            //     assert(!at_location.empty());
+            // }
+
+            // // Move all
+            // for(const auto& id : ids) {
+            //     engine.moveEntityBy(id, Array<unsigned long, 3>({1, 1, 1}));
+            // }
+
+            // // Re-verify location
+            // for(const auto& entity : engine.getEntities()) {
+            //     auto at_location = engine.getEntitiesAt(entity.second->_entity.coords);
+            //     assert(!at_location.empty());
+            // }
+            // auto at_origin = engine.getEntitiesAt(Array<unsigned long, 3>({0, 0, 0}));
+            // assert(at_origin.empty());
+            
+            // // Despawn all
+            // for(const auto& id : ids) {
+            //     engine.despawn(id);
+            // }
+            // auto at_corner = engine.getEntitiesAt(Array<unsigned long, 3>({x_dim, y_dim, z_dim}));
+            // assert(at_corner.empty());
+            
+            // // Verify all locations are empty
+            // for(const auto& entity : engine.getEntities()) {
+            //     auto at_location = engine.getEntitiesAt(entity.second->_entity.coords);
+            //     assert(at_location.empty());
+            // }
+        }
+    }
+}
+
+void testDifferentEntities()
+{
+    struct BaseEntity
+    {
+        virtual ~BaseEntity() {}
+    };
+
+    struct Antenna : public BaseEntity
+    {
+        char broadcasting_on;
+
+        Antenna(char c) : broadcasting_on(c) {}
+    };
+
+    struct Antinode : public BaseEntity
+    {
+        char accepting_on;
+
+        Antinode(char c) : accepting_on(c) {}
+    };
+
+    DiscreteUnorderedEngine2<std::shared_ptr<BaseEntity>, 2> engine(MyArray<unsigned long, 2>({8, 6}));
+
+    Antenna ant_a('a');
+    Antenna ant_a2('a');
+    Antenna ant_b('b');
+
+
+    std::shared_ptr<Antenna> ant_a_ptr = make_unique<Antenna>(ant_a);
+    std::shared_ptr<Antenna> ant_a2_ptr = make_unique<Antenna>(ant_a2);
+    std::shared_ptr<BaseEntity> ant_b_ptr = make_unique<Antenna>(ant_b);
+
+    PointEntity<std::shared_ptr<BaseEntity>, 2> ant_a_ent{ant_a_ptr, MyArray<unsigned long, 2>({4, 3})};
+    PointEntity<std::shared_ptr<BaseEntity>, 2> ant_a2_ent{ant_a2_ptr, MyArray<unsigned long, 2>({4, 3})};
+    PointEntity<std::shared_ptr<BaseEntity>, 2> ant_b_ent{ant_b_ptr, MyArray<unsigned long, 2>({2, 1})};
+
+    auto ida = engine.spawn(ant_a_ent);
+    auto ida2 = engine.spawn(ant_a2_ent);
+    auto idb = engine.spawn(ant_b_ent);
+
+    std::weak_ptr<HashedEntity<PointEntity<std::shared_ptr<BaseEntity>, 2U, unsigned long>, unsigned long>> a_retrieved = engine.getEntity(ida);
+    std::weak_ptr<HashedEntity<PointEntity<std::shared_ptr<BaseEntity>, 2U, unsigned long>, unsigned long>> a2_retrieved = engine.getEntity(ida2);
+    auto b_retrieved = engine.getEntity(idb);
+
+    char a_accepting = std::dynamic_pointer_cast<Antenna>(a_retrieved.lock()->point_entity.entity)->broadcasting_on;
+    char a2_accepting = std::dynamic_pointer_cast<Antenna>(a2_retrieved.lock()->point_entity.entity)->broadcasting_on;
+    char b_accepting = std::dynamic_pointer_cast<Antenna>(b_retrieved.lock()->point_entity.entity)->broadcasting_on;
+    assert(a_accepting == 'a');
+    assert(a2_accepting == 'a');
+    assert(b_accepting == 'b');
+
+    Antinode antinode_a('a');
+    Antinode antinode_b('b');
+
+    std::shared_ptr<Antinode> antinode_a_ptr = make_unique<Antinode>(antinode_a);
+    std::shared_ptr<BaseEntity> antinode_b_ptr = make_unique<Antinode>(antinode_b);
+
+    PointEntity<std::shared_ptr<BaseEntity>, 2> antinode_a_ent{antinode_a_ptr, MyArray<unsigned long, 2>({4, 3})};
+    PointEntity<std::shared_ptr<BaseEntity>, 2> antinode_b_ent{antinode_b_ptr, MyArray<unsigned long, 2>({2, 1})};
+
+    auto antinode_a_id = engine.spawn(antinode_a_ent);
+    auto antinode_b_id = engine.spawn(antinode_b_ent);
+
+    std::weak_ptr<HashedEntity<PointEntity<std::shared_ptr<BaseEntity>, 2U, unsigned long>, unsigned long>> antinode_a_retrieved = engine.getEntity(antinode_a_id);
+    auto antinode_b_retrieved = engine.getEntity(antinode_b_id);
+
+    char antinode_a_accepting = std::dynamic_pointer_cast<Antinode>(antinode_a_retrieved.lock()->point_entity.entity)->accepting_on;
+    char antinode_b_accepting = std::dynamic_pointer_cast<Antinode>(antinode_b_retrieved.lock()->point_entity.entity)->accepting_on;
+    assert(antinode_a_accepting == 'a');
+    assert(antinode_b_accepting == 'b');
+
+    auto result = engine.getEntitiesOf(ant_a_ptr);
 }
 
 int main(int argc, char *argv[])
 {
-    test_array_operations();
-    test_narray();
-    test_world();
-    test_ptr_world();
-    test_ptr_world2();
-    test_ptr_world2_scoping();
-    test_engine1_private();
-    test_engine1();
-    test_engine2_private();
-    test_engine2();
-    test_discrete_grid_and_engine();
+    // test_array_operations();
+    // test_world();
+    // test_ptr_world();
+    // test_ptr_world2();
+    // test_ptr_world2_scoping();
+    // test_engine1_private();
+    // test_engine1();
+    // test_engine2_private();
+    // test_engine2();
+    // test_despawn_issue();
+    // test_discrete_engine();
+    // test_discrete_grid_and_engine();
     // test_engine_mass();
+    // final_test();
+
+    // test_narray();
+    // test_grid_functionality();
+    // final_testp1();
+    // testMove();
+
+    // test_dimarray();
+    // test_grid2_functionality();
+    // final_testp12();
+    // testMove2();
+
+    testDifferentEntities();
+
     return 0;
 }

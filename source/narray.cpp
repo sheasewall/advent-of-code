@@ -39,12 +39,14 @@ X Array<X, D, I>::getElement(const I& i) const
 
 template <typename X, unsigned int D, typename I>
 bool Array<X, D, I>::operator==(const Array<X, D, I>& arr) {
-    bool matches = true;
     for (I i = 0; i < internal_arr.size(); i++)
     {
-        matches = (internal_arr[i] == arr.getElement(i));
+        if (internal_arr[i] != arr.getElement(i))
+        {
+            return false;
+        }
     }
-    return matches;
+    return true;
 }
 
 template <typename X, unsigned int D, typename I>
@@ -84,7 +86,8 @@ class NArray
     NArray &operator=(NArray &&v) = delete;
     NArray<T, Dim - 1, Index> &operator[](const Index &i);
     T &getElement(Array<Index, Dim> coords);
-    bool putElement(Array<Index, Dim> coords, const T &el);
+    void putElement(Array<Index, Dim> coords, const T &el);
+    bool isInBounds(Array<Index, Dim> coords);
 
     // Want to only expose this to other NArrays
     template<typename U, unsigned int D, typename I>
@@ -122,11 +125,11 @@ NArray<T, Dim - 1, Index> &NArray<T, Dim, Index>::operator[](const Index &i)
 {
     if (i < 0)
     {
-        std::throw_with_nested(std::out_of_range("Index was too low"));
+        throw std::out_of_range("Index was too low for []");
     }
     if (i >= internal_vec.size())
     {
-        std::throw_with_nested(std::out_of_range("Index was too high"));
+        throw std::out_of_range("Index was too high for []");
     }
     return internal_vec[i];
 }
@@ -134,9 +137,13 @@ NArray<T, Dim - 1, Index> &NArray<T, Dim, Index>::operator[](const Index &i)
 template <typename T, unsigned int Dim, typename Index>
 T& NArray<T, Dim, Index>::getElement(Array<Index, Dim> coords)
 {
+    if (coords.front() < 0)
+    {
+        throw std::out_of_range("Index was too low for getElement");
+    }
     if (coords.front() >= internal_vec.size())
     {
-        std::throw_with_nested(std::out_of_range("Index was too high"));
+        throw std::out_of_range("Index was too high for getElement");
     }
     NArray<T, Dim - 1, Index> &sub_nvec = internal_vec[coords.front()];
     Array<Index, Dim - 1> sub_coords;
@@ -145,8 +152,29 @@ T& NArray<T, Dim, Index>::getElement(Array<Index, Dim> coords)
 }
 
 template <typename T, unsigned int Dim, typename Index>
-bool NArray<T, Dim, Index>::putElement(Array<Index, Dim> coords, const T &el)
+void NArray<T, Dim, Index>::putElement(Array<Index, Dim> coords, const T &el)
 {
+    if (coords.front() < 0)
+    {
+        throw std::out_of_range("Index was too low for putElement");
+    }
+    if (coords.front() >= internal_vec.size())
+    {
+        throw std::out_of_range("Index was too high for putElement");
+    }
+    NArray<T, Dim - 1, Index> &sub_nvec = internal_vec[coords.front()];
+    Array<Index, Dim - 1> sub_coords;
+    std::copy(coords.begin() + 1, coords.end(), sub_coords.begin());
+    return sub_nvec.putElement(sub_coords, el);
+}
+
+template <typename T, unsigned int Dim, typename Index>
+bool NArray<T, Dim, Index>::isInBounds(Array<Index, Dim> coords) 
+{
+    if (coords.front() < 0)
+    {
+        return false;
+    }
     if (coords.front() >= internal_vec.size())
     {
         return false;
@@ -154,7 +182,7 @@ bool NArray<T, Dim, Index>::putElement(Array<Index, Dim> coords, const T &el)
     NArray<T, Dim - 1, Index> &sub_nvec = internal_vec[coords.front()];
     Array<Index, Dim - 1> sub_coords;
     std::copy(coords.begin() + 1, coords.end(), sub_coords.begin());
-    return sub_nvec.putElement(sub_coords, el);
+    return sub_nvec.isInBounds(sub_coords);
 }
 
 ///
@@ -177,7 +205,8 @@ class NArray<T, 1, Index>
     NArray &operator=(NArray &&v) = delete;
     T &operator[](const Index &i);
     T &getElement(Array<Index, 1> coords);
-    bool putElement(Array<Index, 1> coords, const T &el);
+    void putElement(Array<Index, 1> coords, const T &el);
+    bool isInBounds(Array<Index, 1> coords);
 
     // Want to only expose this to other NArrays
     template<typename U, unsigned int D, typename I>
@@ -210,11 +239,11 @@ T& NArray<T, 1, Index>::operator[](const Index &i)
 {
     if (i < 0)
     {
-        std::throw_with_nested(std::out_of_range("Index was too low"));
+        throw std::out_of_range("Index was too low");
     }
     if (i >= internal_vec.size())
     {
-        std::throw_with_nested(std::out_of_range("Index was too high"));
+        throw std::out_of_range("Index was too high");
     }
     return internal_vec[i];
 }
@@ -222,21 +251,42 @@ T& NArray<T, 1, Index>::operator[](const Index &i)
 template <typename T, typename Index> 
 T& NArray<T, 1, Index>::getElement(Array<Index, 1> coords)
 {
+    if (coords[0] < 0)
+    {
+        throw std::out_of_range("Index was too low");
+    }
     if (coords[0] + 1 > internal_vec.size())
     {
-        std::throw_with_nested(std::out_of_range("Index was too high"));
+        throw std::out_of_range("Index was too high");
     }
     return internal_vec[coords[0]];
 }
 
 template <typename T, typename Index> 
-bool NArray<T, 1, Index>::putElement(Array<Index, 1> coords, const T &el)
+void NArray<T, 1, Index>::putElement(Array<Index, 1> coords, const T &el)
 {
+    if (coords[0] < 0)
+    {
+        throw std::out_of_range("Index was too low");
+    }
     if (coords[0] + 1 > internal_vec.size())
+    {
+        throw std::out_of_range("Index was too high");
+    }
+    internal_vec[coords[0]] = el;
+}
+
+template <typename T, typename Index>
+bool NArray<T, 1, Index>::isInBounds(Array<Index, 1> coords) 
+{
+    if (coords[0] < 0)
     {
         return false;
     }
-    internal_vec[coords[0]] = el;
+    if (coords[0] >= internal_vec.size())
+    {
+        return false;
+    }
     return true;
 }
 

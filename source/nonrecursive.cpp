@@ -450,3 +450,13 @@ void DiscreteUnorderedEngine2<T, Dim, Index>::moveEntityTo(const Index id, Coord
 }
 
 ///
+
+// class BaseEntity
+// {
+//     virtual ~BaseEntity() {}
+// };
+
+// class PointEngine2D : public DiscreteUnorderedEngine2<BaseEntity, 2>
+// {
+    
+// };
