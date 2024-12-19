@@ -270,81 +270,75 @@ bool DimensionalArray<T, 1, Index>::isInBounds(MyArray<Index, 1> coords)
 
 ///
 
-template <typename EntityType, unsigned int Dim, typename Index = unsigned long>
-struct PointEntity
+template <typename BaseEntity, unsigned int Dim>
+class TileEntity
 {
-    EntityType entity;
-    MyArray<Index, Dim> coords;
-};
+    using Id = unsigned long;
+    using BaseEntityPtr = std::unique_ptr<BaseEntity>;
+    using Coords = MyArray<Id, Dim>;
 
-template <typename PointEntity, typename Id = unsigned long>
-struct HashedEntity
-{
-    Id id;
-    PointEntity point_entity;
+    const Id id;
+    BaseEntityPtr internal_entity;
+    Coords coords;
 
-    HashedEntity(Id _id, PointEntity e) : id(_id), point_entity(e) {}
+public:
+    TileEntity(Id i, BaseEntityPtr e, Coords c) : id(i), internal_entity(std::move(e)), coords(c) {}
+    Id getId() { return id; }
+    BaseEntityPtr getInternalEntity() { return internal_entity; }
+    Coords getCoords() { return coords; }
+    void setCoords(Coords new_coords) { coords = new_coords; }
 };
 
 ///
 
-template <typename T, unsigned int Dim, typename Index = unsigned long>
-class CellGrid2 {
-    using DiscreteEntity = HashedEntity<PointEntity<T, Dim, Index>, Index>;
-    using WeakEntityPtr = std::weak_ptr<DiscreteEntity>;
-    using Coords = MyArray<Index, Dim>;
-    using Cell = std::unordered_map<Index, WeakEntityPtr>;
+template <typename BaseEntity, unsigned int Dim>
+class TileGrid {
+    using EngineEntity = TileEntity<BaseEntity, Dim>;
+    using SharedEntityPtr = std::shared_ptr<EngineEntity>;
+    using WeakEntityPtr = std::weak_ptr<EngineEntity>;
+
+    using Id = unsigned long;
+    using Coords = MyArray<Id, Dim>;
+    using Tile = std::unordered_map<Id, WeakEntityPtr>;
 
 private:
-    DimensionalArray<Cell, Dim, Index> world;
+    DimensionalArray<Tile, Dim, Id> world;
 
 public:
-    CellGrid2() : world() {}
-    CellGrid2(Coords widths) : world(widths) {}
+    TileGrid() : world() {}
+    TileGrid(Coords widths) : world(widths) {}
 
-    void spawn(const WeakEntityPtr& weak_e_ptr);
-    void despawn(const WeakEntityPtr& to_despawn);
-    Cell getCell(Coords coords);
+    void put(const WeakEntityPtr& weak_e_ptr);
+    void remove(const WeakEntityPtr& to_despawn);
+    Tile getTile(Coords coords);
 
     bool isInBounds(Coords coords);
 };
 
-template<unsigned int Dim, typename Index>
-std::vector<Index> toVec(MyArray<Index, Dim> arr)
-{
-    std::vector<Index> vec;
-    for (Index i : arr)
+template <typename BaseEntity, unsigned int Dim>
+void TileGrid<BaseEntity, Dim>::put(const WeakEntityPtr& weak_e_ptr) {
+    if (SharedEntityPtr e_ptr = weak_e_ptr.lock())
     {
-        vec.push_back(i);
-    }
-    return vec;
-}
-
-template <typename T, unsigned int Dim, typename Index>
-void CellGrid2<T, Dim, Index>::spawn(const WeakEntityPtr& weak_e_ptr) {
-    if (std::shared_ptr<DiscreteEntity> e_ptr = weak_e_ptr.lock())
-    {
-        world.getElement(e_ptr->point_entity.coords)[e_ptr->id] = weak_e_ptr;
+        world.getElement(e_ptr->getCoords())[e_ptr->getId()] = weak_e_ptr;
     }
 }
 
-template <typename T, unsigned int Dim, typename Index>
-void CellGrid2<T, Dim, Index>::despawn(const WeakEntityPtr& to_despawn) {
-    if (std::shared_ptr<DiscreteEntity> e_ptr = to_despawn.lock())
+template <typename BaseEntity, unsigned int Dim>
+void TileGrid<BaseEntity, Dim>::remove(const WeakEntityPtr& to_despawn) {
+    if (SharedEntityPtr e_ptr = to_despawn.lock())
     {
-        world.getElement(e_ptr->point_entity.coords).erase(e_ptr->id);
+        world.getElement(e_ptr->getCoords()).erase(e_ptr->getId());
     }
 }
 
-template <typename T, unsigned int Dim, typename Index>
-std::unordered_map<Index, std::weak_ptr<HashedEntity<PointEntity<T, Dim, Index>, Index>>>
-CellGrid2<T, Dim, Index>::getCell(Coords coords)
+template <typename BaseEntity, unsigned int Dim>
+std::unordered_map<unsigned long, std::weak_ptr<TileEntity<BaseEntity, Dim>>> TileGrid<BaseEntity, Dim>::getTile(Coords coords)
 {
     return world.getElement(coords);
 }
 
-template <typename E, unsigned int Dim, typename Index>
-bool CellGrid2<E, Dim, Index>::isInBounds(Coords coords)
+template <typename BaseEntity, unsigned int Dim>
+bool TileGrid<BaseEntity, Dim>::isInBounds(Coords coords)
 {
     return world.isInBounds(coords);
 }
@@ -354,109 +348,93 @@ bool CellGrid2<E, Dim, Index>::isInBounds(Coords coords)
 ///
 ///
 
-template <typename T, unsigned int Dim, typename Index = unsigned long>
-class DiscreteUnorderedEngine2
+template <typename BaseEntity, unsigned int Dim>
+class TileEngine
 {
-    using DiscreteEntity = PointEntity<T, Dim, Index>;
-    using HashEntity = HashedEntity<DiscreteEntity, Index>;
-    using EntityPtr = std::shared_ptr<HashEntity>;
-    using WeakEntityPtr = std::weak_ptr<HashEntity>;
-    using Coords = MyArray<Index, Dim>;
-    using World = CellGrid2<T, Dim, Index>;
-    using Cell = std::unordered_map<Index, EntityPtr>;
-    using WeakCell = std::unordered_map<Index, WeakEntityPtr>;
+    using EngineEntity = TileEntity<BaseEntity, Dim>;
+    using SharedEntityPtr = std::shared_ptr<EngineEntity>;
+    using WeakEntityPtr = std::weak_ptr<EngineEntity>;
+
+    using Id = unsigned long;
+    using BaseEntityPtr = std::unique_ptr<BaseEntity>;
+    using Coords = MyArray<Id, Dim>;
+    using Tile = std::unordered_map<Id, WeakEntityPtr>;
+    using WeakTile = std::unordered_map<Id, WeakEntityPtr>;
+    using World = TileGrid<BaseEntity, Dim>;
 
 private:
+    SharedEntityPtr createEntity(const BaseEntity& e, Coords loc);
+
+protected:
     World world;
-    Index max_id;
-    std::unordered_map<Index, EntityPtr> entities;
-    std::unordered_map<T, std::unordered_map<Index, WeakEntityPtr>> entities_by_type;
+    Id max_id;
+    std::unordered_map<Id, SharedEntityPtr> entities;
 
 public:
-    DiscreteUnorderedEngine2() : world(), max_id(), entities(), entities_by_type() {}
-    DiscreteUnorderedEngine2(World _world) : world(_world), max_id(), entities(), entities_by_type() {}
-    DiscreteUnorderedEngine2(Coords widths) : world(widths), max_id(), entities(), entities_by_type() {}
+    TileEngine() : world(), max_id(), entities() {}
+    TileEngine(Coords widths) : world(widths), max_id(), entities() {}
 
-    Index spawn(const DiscreteEntity& entity);
-    void despawn(const HashEntity& entity);
-    void despawn(const Index& id);
+    Id spawn(const BaseEntity& new_entity, const Coords loc = std::vector<unsigned long>(Dim));
+    void despawn(const Id& id);
 
-    void moveEntityBy(const Index id, Coords displacement);
-    void moveEntityTo(const Index id, Coords new_coords);
+    void moveEntityBy(const Id id, Coords displacement);
+    void moveEntityTo(const Id id, Coords new_coords);
 
-    // for testing
-    std::unordered_map<Index, EntityPtr> getEntities() { return entities; }
-
-    WeakEntityPtr getEntity(const Index id);
-    WeakCell getEntitiesAt(Coords coords) { return world.getCell(coords); }
-    WeakCell getEntitiesOf(const T& entity_type);
+    WeakEntityPtr getEntity(const Id id);
+    WeakTile getEntitiesAt(Coords coords) { return world.getTile(coords); }
 };
 
-template <typename E, unsigned int Dim, typename Index>
-Index DiscreteUnorderedEngine2<E, Dim, Index>::spawn(const DiscreteEntity& entity) {
-    HashEntity hashed = HashEntity(max_id, entity);
-    max_id++;
-    EntityPtr e_ptr = std::make_shared<HashEntity>(hashed);
-    entities[hashed.id] = e_ptr;
-    WeakEntityPtr weak_e_ptr = WeakEntityPtr(e_ptr);
-    entities_by_type[hashed.point_entity.entity][hashed.id] = weak_e_ptr;
-    world.spawn(weak_e_ptr);
-    return hashed.id;
-}
-
-template <typename T, unsigned int Dim, typename Index>
-std::weak_ptr<HashedEntity<PointEntity<T, Dim, Index>, Index>> DiscreteUnorderedEngine2<T, Dim, Index>::getEntity(const Index id) {
-    return WeakEntityPtr(entities[id]);
-}
-
-template <typename T, unsigned int Dim, typename Index>
-void DiscreteUnorderedEngine2<T, Dim, Index>::despawn(const HashEntity& to_despawn)
+template <typename BaseEntity, unsigned int Dim>
+std::shared_ptr<TileEntity<BaseEntity, Dim>> TileEngine<BaseEntity, Dim>::createEntity(const BaseEntity& entity, Coords loc)
 {
-    world.despawn(entities[to_despawn.id]);
-    entities.erase(to_despawn.id);
-    entities_by_type[to_despawn.point_entity.entity].erase(to_despawn.id);
+    BaseEntityPtr base_ptr(new BaseEntity(entity));
+    return std::make_shared<EngineEntity>(max_id++, std::move(base_ptr), loc);
 }
 
-template <typename T, unsigned int Dim, typename Index>
-void DiscreteUnorderedEngine2<T, Dim, Index>::despawn(const Index& id)
+template <typename BaseEntity, unsigned int Dim>
+typename TileEngine<BaseEntity, Dim>::Id TileEngine<BaseEntity, Dim>::spawn(const BaseEntity& new_entity, const Coords loc)
 {
-    EntityPtr to_despawn = entities[id];
-    despawn(*to_despawn);
+    SharedEntityPtr e_ptr = createEntity(new_entity, loc);
+    Id id = e_ptr->getId();
+    entities[id] = e_ptr;
+    world.put(e_ptr);
+    return id;
 }
 
-template <typename T, unsigned int Dim, typename Index>
-std::unordered_map<Index, std::weak_ptr<HashedEntity<PointEntity<T, Dim, Index>, Index>>> DiscreteUnorderedEngine2<T, Dim, Index>::getEntitiesOf(const T& entity_type) {
-    return entities_by_type[entity_type];
-}
-
-template <typename T, unsigned int Dim, typename Index>
-void DiscreteUnorderedEngine2<T, Dim, Index>::moveEntityBy(const Index id, Coords displacement)
+template <typename BaseEntity, unsigned int Dim>
+void TileEngine<BaseEntity, Dim>::despawn(const Id& id)
 {
-    displacement.add(entities[id]->point_entity.coords);
+    world.remove(entities[id]);
+    entities.erase(id);
+}
+
+template <typename BaseEntity, unsigned int Dim>
+void TileEngine<BaseEntity, Dim>::moveEntityBy(const Id id, Coords displacement)
+{
+    displacement.add(entities[id]->getCoords());
     moveEntityTo(id, displacement);
 }
 
-template <typename T, unsigned int Dim, typename Index>
-void DiscreteUnorderedEngine2<T, Dim, Index>::moveEntityTo(const Index id, Coords new_coords)
+template <typename BaseEntity, unsigned int Dim>
+void TileEngine<BaseEntity, Dim>::moveEntityTo(const Id id, Coords new_coords)
 {
     if (!world.isInBounds(new_coords))
     {
         throw std::invalid_argument("Coordinates out of bounds");
     }
-    EntityPtr to_move = entities[id];
-    world.despawn(to_move);
-    to_move->point_entity.coords = new_coords;
-    world.spawn(to_move);
+    SharedEntityPtr to_move = entities[id];
+    world.remove(to_move);
+    to_move->setCoords(new_coords);
+    world.put(to_move);
+}
+
+template <typename BaseEntity, unsigned int Dim>
+std::weak_ptr<TileEntity<BaseEntity, Dim>> TileEngine<BaseEntity, Dim>::getEntity(const Id id)
+{
+    return entities[id];
 }
 
 ///
+///
+///
 
-// class BaseEntity
-// {
-//     virtual ~BaseEntity() {}
-// };
-
-// class PointEngine2D : public DiscreteUnorderedEngine2<BaseEntity, 2>
-// {
-    
-// };
